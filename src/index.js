@@ -15,7 +15,8 @@ const gameState = {
         不爽: 0,
         加班: 0,
         會議: 0,
-        被罵: 0
+        被罵: 0,
+        被同事雷: 0
     },
     maxDailyPunchIns: 3
 };
@@ -64,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function updateUI() {
     // 更新數值
     document.getElementById('level').textContent = `Lv.${gameState.level}`;
+    document.getElementById('title').textContent = gameState.title;
     document.getElementById('energy').textContent = `${gameState.energy}/${gameState.maxEnergy}`;
     document.getElementById('mood').textContent = `${gameState.mood}/${gameState.maxMood}`;
     document.getElementById('quitProgress').textContent = `${gameState.quitProgress}%`;
@@ -96,6 +98,13 @@ function updateUI() {
         moodBar.classList.replace('bg-red-500', 'bg-yellow-500');
         moodBar.classList.replace('bg-orange-500', 'bg-yellow-500');
     }
+
+    // 更新打卡次數顯示
+    document.getElementById('punchInCount').textContent = gameState.maxDailyPunchIns - gameState.dailyPunchIns['不爽'];
+    document.getElementById('overtimeCount').textContent = gameState.maxDailyPunchIns - gameState.dailyPunchIns['加班'];
+    document.getElementById('meetingCount').textContent = gameState.maxDailyPunchIns - gameState.dailyPunchIns['會議'];
+    document.getElementById('scoldedCount').textContent = gameState.maxDailyPunchIns - gameState.dailyPunchIns['被罵'];
+    document.getElementById('annoyedCount').textContent = gameState.maxDailyPunchIns - gameState.dailyPunchIns['被同事雷'];
 }
 
 // 設置事件監聽器
@@ -105,6 +114,7 @@ function setupEventListeners() {
     document.getElementById('overtime').addEventListener('click', () => handlePunchIn('加班'));
     document.getElementById('meeting').addEventListener('click', () => handlePunchIn('會議'));
     document.getElementById('scolded').addEventListener('click', () => handlePunchIn('被罵'));
+    document.getElementById('annoyed').addEventListener('click', () => handlePunchIn('被同事雷'));
     
     // 迷因產生器
     document.getElementById('generateMeme').addEventListener('click', generateMeme);
@@ -144,6 +154,12 @@ function handlePunchIn(type) {
             gameState.mood -= 25;
             gameState.quitProgress += 15;
             message = '今天被老闆罵了...';
+            break;
+        case '被同事雷':
+            gameState.mood -= 12;
+            gameState.energy -= 8;
+            gameState.quitProgress += 7;
+            message = '今天又被同事雷到了...';
             break;
     }
 
