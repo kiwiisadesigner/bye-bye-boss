@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>職場生存 RPG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+<script defer src="bundle.3b5f96a330077e44a12e.js"></script></head>
+<body class="bg-gradient-to-br from-gray-900 via-purple-900 to-pink-900 text-white min-h-screen">
+    <!-- 頂部狀態欄 -->
+    <div class="fixed top-0 left-0 right-0 bg-black bg-opacity-80 backdrop-blur-sm p-2 z-50">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="level-badge px-3 py-1">
+                    <span class="font-bold">Lv.5</span>
+                </div>
+                <div class="text-xs">
+                    <div class="text-gray-400">職場老手</div>
+                    <div class="w-20 h-1 bg-gray-700 rounded-full">
+                        <div class="w-1/2 h-full bg-blue-500 rounded-full"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-4">
+                <div class="text-center">
+                    <div class="text-xs text-gray-400">精力</div>
+                    <div class="text-sm font-bold text-green-400" id="energyLevel">89/100</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-xs text-gray-400">心情</div>
+                    <div class="text-sm font-bold text-yellow-400">65/100</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-md mx-auto p-4 pt-16">
+        <!-- 主標題 -->
+        <div class="text-center mb-6">
+            <h1 class="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-400 text-transparent bg-clip-text">
+                職場逃脫 RPG
+            </h1>
+            <p class="text-gray-400">Level <span class="text-purple-400">5</span> 職場老手</p>
+        </div>
+
+        <!-- 每日任務 -->
+        <div class="bg-black bg-opacity-40 backdrop-blur-sm rounded-xl p-6 mb-4">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">每日任務</h2>
+                <div class="text-sm text-gray-400">3/5 完成</div>
+            </div>
+            <div class="space-y-3">
+                <div class="flex items-center p-3 bg-gray-800 rounded-lg opacity-50">
+                    <input type="checkbox" checked disabled class="w-5 h-5 mr-3">
+                    <div>
+                        <div class="font-medium line-through">完成一次開會打卡</div>
+                        <div class="text-sm text-gray-500">獎勵：+2 離職點數</div>
+                    </div>
+                </div>
+                <div class="flex items-center p-3 bg-gray-800 rounded-lg shine">
+                    <input type="checkbox" class="w-5 h-5 mr-3">
+                    <div>
+                        <div class="font-medium">加班到9點以後</div>
+                        <div class="text-sm text-gray-500">獎勵：+3 離職點數</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 離職進度系統 -->
+        <div class="bg-black bg-opacity-40 backdrop-blur-sm rounded-xl p-6 mb-4">
+            <div class="mb-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-xl font-bold">離職進度</h2>
+                    <div class="text-sm text-purple-400">
+                        <span class="animate-pulse">⚡️強化時段中</span>
+                    </div>
+                </div>
+                <div class="w-full h-4 bg-gray-800 rounded-full overflow-hidden">
+                    <div id="progressBar" class="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all" style="width: 0%"></div>
+                </div>
+                <div class="flex justify-between text-sm mt-1">
+                    <span class="text-gray-400">當前進度</span>
+                    <span id="currentPoints" class="text-purple-400 font-bold">0</span>
+                </div>
+            </div>
+
+            <!-- 打卡按鈕區 -->
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <!-- 不爽打卡 -->
+                <button onclick="addPoints('work')" class="pixel-border bg-gradient-to-br from-red-500 to-pink-500 rounded-lg p-4 text-center transform hover:-translate-y-1 transition-all">
+                    <div class="text-2xl mb-1 float">😫</div>
+                    <div class="font-bold">不爽打卡</div>
+                    <div class="text-xs text-pink-200">+2 離職點數</div>
+                    <div class="text-xs text-gray-300 mt-1">連續 3 天</div>
+                </button>
+
+                <!-- 加班打卡 -->
+                <button onclick="addPoints('overtime')" class="pixel-border bg-gradient-to-br from-orange-500 to-red-500 rounded-lg p-4 text-center">
+                    <div class="text-2xl mb-1">🌙</div>
+                    <div class="font-bold">加班打卡</div>
+                    <div class="text-xs text-red-200">+3 離職點數</div>
+                    <div class="text-xs text-gray-300 mt-1">已加班 28 小時</div>
+                </button>
+
+                <!-- 會議打卡 -->
+                <button onclick="addPoints('meeting')" class="pixel-border bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg p-4 text-center">
+                    <div class="text-2xl mb-1">💤</div>
+                    <div class="font-bold">會議打卡</div>
+                    <div class="text-xs text-orange-200">+2 離職點數</div>
+                    <div class="text-xs text-gray-300 mt-1">本週第 5 次</div>
+                </button>
+
+                <!-- 被罵打卡 -->
+                <button onclick="addPoints('boss')" class="pixel-border bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg p-4 text-center">
+                    <div class="text-2xl mb-1">😱</div>
+                    <div class="font-bold">被罵打卡</div>
+                    <div class="text-xs text-purple-200">+5 離職點數</div>
+                    <div class="text-xs text-yellow-400 mt-1">⚡️暴擊加成中</div>
+                </button>
+            </div>
+
+            <!-- 減分事件 -->
+            <div class="space-y-2">
+                <div class="text-sm text-gray-400 mb-2">可能會減分的事件：</div>
+                <button onclick="deductPoints('bonus')" class="w-full hover-bounce bg-gradient-to-r from-green-600 to-teal-600 rounded-lg p-3 text-left">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="font-bold">發薪水/獎金</div>
+                            <div class="text-xs text-green-200">-5 離職點數</div>
+                        </div>
+                        <div class="text-2xl">💰</div>
+                    </div>
+                </button>
+                <button onclick="deductPoints('promotion')" class="w-full hover-bounce bg-gradient-to-r from-blue-600 to-cyan-600 rounded-lg p-3 text-left">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="font-bold">升職加薪</div>
+                            <div class="text-xs text-blue-200">-10 離職點數</div>
+                        </div>
+                        <div class="text-2xl">🎉</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- 職場迷因 -->
+        <div class="bg-black bg-opacity-40 backdrop-blur-sm rounded-xl p-6 mb-4">
+            <h2 class="text-xl font-bold mb-4">今日迷因</h2>
+            <div id="memeCard" class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg p-6 text-center">
+                <div id="memeEmoji" class="text-4xl mb-4 float">😫</div>
+                <div id="memeText" class="text-lg mb-2">主管：這個需求很簡單</div>
+                <div id="memeSubtext" class="text-sm text-gray-400">我：至少要加班到明天</div>
+            </div>
+            <button onclick="generateMeme()" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg mt-4 p-3 pixel-border">
+                換一個
+            </button>
+        </div>
+
+        <!-- 分享卡片 -->
+        <div class="bg-black bg-opacity-40 backdrop-blur-sm rounded-xl p-6 mb-4">
+            <h2 class="text-xl font-bold mb-4">分享進度</h2>
+            <div id="shareCard" class="bg-gradient-to-br from-purple-600 via-pink-600 to-red-600 rounded-lg p-1">
+                <div class="bg-gray-900 rounded-lg p-6">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold mb-1">職場求生進度</div>
+                        <div class="text-sm text-gray-400">Day <span id="dayCount">28</span></div>
+                    </div>
+                    <div class="my-6">
+                        <div class="text-4xl font-bold text-center mb-2">
+                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+                                <span id="sharePoints">0</span> / 100
+                            </span>
+                        </div>
+                        <div class="w-full h-3 bg-gray-800 rounded-full overflow-hidden">
+                            <div id="shareProgress" class="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="text-center mb-4">
+                        <div id="shareEmoji" class="text-4xl mb-2">🎯</div>
+                        <div id="shareStatus" class="italic text-gray-300">"離職進行中..."</div>
+                    </div>
+                    <div class="text-center text-sm text-gray-500">
+                        instagram@_kiwi_go_
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <button onclick="prepareShare()" class="pixel-border bg-gradient-to-r from-pink-500 to-purple-500 rounded-lg p-4 text-center">
+                    <div class="text-2xl mb-1">📸</div>
+                    <div class="font-bold">截圖分享</div>
+                </button>
+                <button onclick="copyShareText()" class="pixel-border bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg p-4 text-center">
+                    <div class="text-2xl mb-1">📝</div>
+                    <div class="font-bold">複製文案</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- 作者資訊 -->
+        <div class="text-center text-sm text-gray-400 mt-6 mb-20">
+            Created by instagram@_kiwi_go_
+        </div>
+    </div>
+
+    <!-- 浮動按鈕 -->
+    <div class="fixed bottom-4 right-4 left-4 flex justify-center gap-4">
+        <button onclick="showAchievements()" class="bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full p-4 shadow-lg">
+            <span class="text-2xl">🏆</span>
+        </button>
+        <button onclick="showInventory()" class="bg-gradient-to-r from-blue-500 to-purple-500 rounded-full p-4 shadow-lg">
+            <span class="text-2xl">📦</span>
+        </button>
+    </div>
+
+    <!-- 提示框 -->
+    <div id="notification" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-75 text-white px-4 py-2 rounded-lg hidden">
+    </div>
+
+</body>
+</html>
