@@ -1,0 +1,85 @@
+        /* 您的樣式 */
+        
+        /* 像素風格邊框 */
+        .pixel-border {
+            box-shadow: 0 0 0 2px #fff,
+                       0 0 0 4px #9333ea;
+            transition: all 0.3s ease;
+        }
+        .pixel-border:hover {
+            box-shadow: 0 0 0 2px #fff,
+                       0 0 0 6px #9333ea;
+            transform: translateY(-2px);
+        }
+
+        /* 浮動動畫 */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* 閃光效果 */
+        @keyframes shine {
+            0% { background-position: -100px; }
+            100% { background-position: 200px; }
+        }
+        .shine {
+            position: relative;
+            overflow: hidden;
+        }
+        .shine::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shine 2s infinite;
+        }
+
+        /* RPG 風格文本框 */
+        .rpg-text {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #fff;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        /* 等級徽章 */
+        .level-badge {
+            position: relative;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            padding: 2px;
+            border-radius: 9999px;
+        }
+        .level-badge::before {
+            content: '';
+            position: absolute;
+            inset: 1px;
+            background: #1f2937;
+            border-radius: 9999px;
+            z-index: 0;
+        }
+        .level-badge > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 進度條動畫 */
+        @keyframes progress {
+            from { width: 0; }
+        }
+        .progress-bar {
+            animation: progress 1s ease-out;
+        }
+
+        /* 成就解鎖動畫 */
+        @keyframes unlock {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .unlock {
+            animation: unlock 0.5s ease-out;
+        }
