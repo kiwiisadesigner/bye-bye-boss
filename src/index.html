@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>離職小幫手 - 職場生存指南</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-purple-900 to-pink-900 text-white min-h-screen">
     <!-- 頂部導航 -->
@@ -17,35 +16,61 @@
     <!-- 主要內容區 -->
     <main class="container mx-auto px-4 py-8">
         <!-- 狀態面板 -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div class="bg-white/10 p-4 rounded-lg">
-                <h2 class="font-bold">精神狀態</h2>
-                <div id="mentalHealth" class="text-2xl mt-2">100%</div>
+                <h2 class="font-bold">等級</h2>
+                <div id="level" class="text-2xl mt-2">Lv.5</div>
+                <div class="text-sm text-gray-300">職場老手</div>
             </div>
             <div class="bg-white/10 p-4 rounded-lg">
-                <h2 class="font-bold">存款狀態</h2>
-                <div id="savings" class="text-2xl mt-2">$0</div>
+                <h2 class="font-bold">精力</h2>
+                <div id="energy" class="text-2xl mt-2">89/100</div>
             </div>
             <div class="bg-white/10 p-4 rounded-lg">
-                <h2 class="font-bold">工作年資</h2>
-                <div id="experience" class="text-2xl mt-2">0 年</div>
+                <h2 class="font-bold">心情</h2>
+                <div id="mood" class="text-2xl mt-2">65/100</div>
+            </div>
+            <div class="bg-white/10 p-4 rounded-lg">
+                <h2 class="font-bold">離職進度</h2>
+                <div id="quitProgress" class="text-2xl mt-2">45%</div>
             </div>
         </div>
 
-        <!-- 事件區域 -->
+        <!-- 打卡系統 -->
         <div class="bg-white/10 p-6 rounded-lg mb-8">
-            <h2 class="text-xl font-bold mb-4">今日工作事件</h2>
-            <div id="eventDescription" class="mb-4">
-                準備開始新的一天...
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button id="option1" class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg transition-colors">
-                    開始工作
+            <h2 class="text-xl font-bold mb-4">今日打卡</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <button id="punchIn" class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg transition-colors">
+                    不爽打卡
                 </button>
-                <button id="option2" class="bg-pink-600 hover:bg-pink-700 px-6 py-3 rounded-lg transition-colors">
-                    請假休息
+                <button id="overtime" class="bg-pink-600 hover:bg-pink-700 px-6 py-3 rounded-lg transition-colors">
+                    加班打卡
+                </button>
+                <button id="meeting" class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg transition-colors">
+                    會議打卡
+                </button>
+                <button id="scolded" class="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg transition-colors">
+                    被罵打卡
                 </button>
             </div>
+        </div>
+
+        <!-- 職場迷因 -->
+        <div class="bg-white/10 p-6 rounded-lg mb-8">
+            <h2 class="text-xl font-bold mb-4">今日職場迷因</h2>
+            <button id="generateMeme" class="w-full bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg transition-colors">
+                產生迷因
+            </button>
+            <div id="memeResult" class="mt-4 text-center text-xl"></div>
+        </div>
+
+        <!-- 離職小語 -->
+        <div class="bg-white/10 p-6 rounded-lg mb-8">
+            <h2 class="text-xl font-bold mb-4">今日離職小語</h2>
+            <button id="generateQuote" class="w-full bg-indigo-600 hover:bg-indigo-700 px-6 py-3 rounded-lg transition-colors">
+                產生離職小語
+            </button>
+            <div id="quoteResult" class="mt-4 text-center text-xl"></div>
         </div>
 
         <!-- 狀態記錄 -->
