@@ -4,11 +4,11 @@ import './styles.css';
 const gameState = {
     level: 1,
     title: '職場新鮮人',
-    energy: 100,
-    mood: 100,
+    energy: parseInt(process.env.MAX_ENERGY) || 100,
+    mood: parseInt(process.env.MAX_MOOD) || 100,
     quitProgress: 0,
-    maxEnergy: 100,
-    maxMood: 100,
+    maxEnergy: parseInt(process.env.MAX_ENERGY) || 100,
+    maxMood: parseInt(process.env.MAX_MOOD) || 100,
     events: [],
     punchIns: 0,
     dailyPunchIns: {
@@ -18,7 +18,7 @@ const gameState = {
         被罵: 0,
         被同事雷: 0
     },
-    maxDailyPunchIns: 3
+    maxDailyPunchIns: parseInt(process.env.MAX_DAILY_PUNCH_INS) || 3
 };
 
 // 職場迷因列表
@@ -63,7 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 更新 UI
 function updateUI() {
-    // 更新數值
     document.getElementById('level').textContent = `Lv.${gameState.level}`;
     document.getElementById('title').textContent = gameState.title;
     document.getElementById('energy').textContent = `${gameState.energy}/${gameState.maxEnergy}`;
@@ -109,17 +108,13 @@ function updateUI() {
 
 // 設置事件監聽器
 function setupEventListeners() {
-    // 打卡系統
     document.getElementById('punchIn').addEventListener('click', () => handlePunchIn('不爽'));
     document.getElementById('overtime').addEventListener('click', () => handlePunchIn('加班'));
     document.getElementById('meeting').addEventListener('click', () => handlePunchIn('會議'));
     document.getElementById('scolded').addEventListener('click', () => handlePunchIn('被罵'));
     document.getElementById('annoyed').addEventListener('click', () => handlePunchIn('被同事雷'));
     
-    // 迷因產生器
     document.getElementById('generateMeme').addEventListener('click', generateMeme);
-    
-    // 離職小語
     document.getElementById('generateQuote').addEventListener('click', generateQuote);
 }
 
@@ -135,8 +130,8 @@ function handlePunchIn(type) {
     let message = '';
     switch(type) {
         case '不爽':
-            gameState.mood -= 10;
-            gameState.quitProgress += 5;
+            gameState.mood -= parseInt(process.env.MOOD_DECREASE_RATE) || 10;
+            gameState.quitProgress += parseInt(process.env.QUIT_PROGRESS_INCREASE_RATE) || 5;
             message = '又是不爽的一天...';
             break;
         case '加班':
@@ -163,7 +158,6 @@ function handlePunchIn(type) {
             break;
     }
 
-    // 確保數值在合理範圍內
     gameState.energy = Math.max(0, Math.min(100, gameState.energy));
     gameState.mood = Math.max(0, Math.min(100, gameState.mood));
     gameState.quitProgress = Math.min(100, gameState.quitProgress);
@@ -218,12 +212,11 @@ function checkGameStatus() {
 
 // 重置遊戲
 function resetGame() {
-    gameState.energy = 100;
-    gameState.mood = 100;
+    gameState.energy = parseInt(process.env.MAX_ENERGY) || 100;
+    gameState.mood = parseInt(process.env.MAX_MOOD) || 100;
     gameState.quitProgress = 0;
     gameState.level += 1;
     gameState.title = updateTitle(gameState.level);
-    // 重置每日打卡次數
     Object.keys(gameState.dailyPunchIns).forEach(key => {
         gameState.dailyPunchIns[key] = 0;
     });
