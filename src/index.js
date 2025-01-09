@@ -2,15 +2,22 @@ import './styles.css';
 
 // 遊戲狀態
 const gameState = {
-    level: 5,
-    title: '職場老手',
-    energy: 89,
-    mood: 65,
-    quitProgress: 45,
+    level: 1,
+    title: '職場新鮮人',
+    energy: 100,
+    mood: 100,
+    quitProgress: 0,
     maxEnergy: 100,
     maxMood: 100,
     events: [],
-    punchIns: 0
+    punchIns: 0,
+    dailyPunchIns: {
+        不爽: 0,
+        加班: 0,
+        會議: 0,
+        被罵: 0
+    },
+    maxDailyPunchIns: 3
 };
 
 // 職場迷因列表
@@ -55,10 +62,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 更新 UI
 function updateUI() {
+    // 更新數值
     document.getElementById('level').textContent = `Lv.${gameState.level}`;
     document.getElementById('energy').textContent = `${gameState.energy}/${gameState.maxEnergy}`;
     document.getElementById('mood').textContent = `${gameState.mood}/${gameState.maxMood}`;
     document.getElementById('quitProgress').textContent = `${gameState.quitProgress}%`;
+    
+    // 更新進度條
+    document.getElementById('energyBar').style.width = `${(gameState.energy / gameState.maxEnergy) * 100}%`;
+    document.getElementById('moodBar').style.width = `${(gameState.mood / gameState.maxMood) * 100}%`;
+    document.getElementById('quitBar').style.width = `${gameState.quitProgress}%`;
+    
+    // 更新進度條顏色
+    const energyBar = document.getElementById('energyBar');
+    const moodBar = document.getElementById('moodBar');
+    
+    // 精力條顏色
+    if (gameState.energy <= 30) {
+        energyBar.classList.replace('bg-green-500', 'bg-red-500');
+    } else if (gameState.energy <= 60) {
+        energyBar.classList.replace('bg-green-500', 'bg-yellow-500');
+    } else {
+        energyBar.classList.replace('bg-red-500', 'bg-green-500');
+        energyBar.classList.replace('bg-yellow-500', 'bg-green-500');
+    }
+    
+    // 心情條顏色
+    if (gameState.mood <= 30) {
+        moodBar.classList.replace('bg-yellow-500', 'bg-red-500');
+    } else if (gameState.mood <= 60) {
+        moodBar.classList.replace('bg-yellow-500', 'bg-orange-500');
+    } else {
+        moodBar.classList.replace('bg-red-500', 'bg-yellow-500');
+        moodBar.classList.replace('bg-orange-500', 'bg-yellow-500');
+    }
 }
 
 // 設置事件監聽器
@@ -78,6 +115,13 @@ function setupEventListeners() {
 
 // 處理打卡
 function handlePunchIn(type) {
+    if (gameState.dailyPunchIns[type] >= gameState.maxDailyPunchIns) {
+        alert('今天這種打卡已經達到上限了！');
+        return;
+    }
+
+    gameState.dailyPunchIns[type]++;
+    
     let message = '';
     switch(type) {
         case '不爽':
@@ -163,6 +207,10 @@ function resetGame() {
     gameState.quitProgress = 0;
     gameState.level += 1;
     gameState.title = updateTitle(gameState.level);
+    // 重置每日打卡次數
+    Object.keys(gameState.dailyPunchIns).forEach(key => {
+        gameState.dailyPunchIns[key] = 0;
+    });
     updateUI();
     addToLog('開始新的職場生活！');
 }
