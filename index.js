@@ -1049,6 +1049,7 @@ function levelUp() {
 
 // 重置遊戲數據
 async function resetGameData() {
+    console.log('重置函數被調用'); // 添加日誌
     try {
         // 顯示確認對話框
         const result = await Swal.fire({
@@ -1065,14 +1066,18 @@ async function resetGameData() {
             customClass: swalCustomClass
         });
 
+        console.log('確認對話框結果:', result); // 添加日誌
+
         // 如果用戶確認要重置
         if (result.isConfirmed) {
+            console.log('開始重置數據'); // 添加日誌
+            
             // 重置遊戲數據到初始狀態
             game = {
                 data: {
                     level: 1,
                     exp: 0,
-                    expToNext: 1000, // 基礎經驗值
+                    expToNext: 1000,
                     stress: 0,
                     stressMax: 100,
                     happyCount: 0,
@@ -1090,6 +1095,7 @@ async function resetGameData() {
 
             // 清除所有本地存儲
             localStorage.clear();
+            console.log('本地存儲已清除'); // 添加日誌
             
             // 保存新的初始狀態
             saveGameState();
@@ -1112,8 +1118,7 @@ async function resetGameData() {
             window.location.reload();
         }
     } catch (error) {
-        console.error('重置遊戲數據時發生錯誤:', error);
-        // 顯示具體錯誤信息
+        console.error('重置遊戲數據時發生錯誤:', error); // 更詳細的錯誤日誌
         Swal.fire({
             title: '重置失敗',
             text: '發生錯誤：' + error.message,
@@ -1136,4 +1141,63 @@ function saveGameState() {
 }
 
 // 確保函數在全局範圍可用
-window.resetGameData = resetGameData;   
+window.resetGameData = resetGameData;
+
+// 在 DOM 載入完成後綁定事件
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM 載入完成'); // 添加日誌
+    const resetButton = document.querySelector('.reset-btn');
+    if (resetButton) {
+        console.log('找到重置按鈕'); // 添加日誌
+        resetButton.addEventListener('click', resetGameData);
+    } else {
+        console.log('未找到重置按鈕'); // 添加日誌
+    }
+});
+
+// 確保所有函數都在全局範圍內可用
+window.game = {
+    data: {
+        level: 1,
+        exp: 0,
+        expToNext: 1000,
+        stress: 0,
+        stressMax: 100,
+        happyCount: 0,
+        angryCount: 0,
+        lastStressReductionTime: null,
+        lastDailyResetTime: null,
+        dailyActions: {
+            overtime: 0,
+            meeting: 0,
+            blame: 0,
+            thunder: 0
+        }
+    }
+};
+
+// 重置遊戲數據函數
+function resetGameData() {
+    console.log('重置函數被調用');
+    // ... 原有的重置邏輯 ...
+}
+
+// 初始化函數
+function initializeGame() {
+    console.log('初始化遊戲');
+    // 綁定重置按鈕
+    const resetButton = document.querySelector('.reset-btn');
+    if (resetButton) {
+        console.log('找到重置按鈕');
+        resetButton.addEventListener('click', resetGameData);
+    } else {
+        console.error('未找到重置按鈕');
+    }
+}
+
+// 在 DOM 載入完成後初始化
+document.addEventListener('DOMContentLoaded', initializeGame);
+
+// 確保函數在全局範圍可用
+window.resetGameData = resetGameData;
+window.initializeGame = initializeGame;   
