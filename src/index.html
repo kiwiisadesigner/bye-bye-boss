@@ -1,181 +1,937 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>離職小幫手 - 職場生存指南</title>
+    <title>離職小幫手</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="bundle.8babfe0435b2ad42e8db.js"></script>
-    <!-- 添加 Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'game-primary': '#6D28D9',
+                        'game-secondary': '#DB2777',
+                        'game-dark': '#1A1625',
+                        'game-light': '#E2E8F0',
+                        'game-accent': '#F59E0B'
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 基礎背景 */
+        body {
+            background: linear-gradient(125deg, #1a1c4b 0%, #372f6a 50%, #1a1c4b 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        /* 漸層框線卡片 */
+        .gradient-border-card {
+            position: relative;
+            background: rgba(13, 12, 19, 0.7);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            backdrop-filter: blur(12px);
+        }
+
+        .gradient-border-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 1rem;
+            padding: 2px;
+            background: linear-gradient(
+                45deg,
+                #6D28D9,
+                #DB2777,
+                #6D28D9
+            );
+            -webkit-mask: 
+                linear-gradient(#fff 0 0) content-box, 
+                linear-gradient(#fff 0 0);
+            mask: 
+                linear-gradient(#fff 0 0) content-box, 
+                linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+        }
+
+        /* 漸層框線按鈕 */
+        .gradient-border-button {
+            position: relative;
+            background: rgba(13, 12, 19, 0.7);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .gradient-border-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 0.75rem;
+            padding: 2px;
+            background: linear-gradient(
+                45deg,
+                #6D28D9,
+                #DB2777,
+                #6D28D9
+            );
+            -webkit-mask: 
+                linear-gradient(#fff 0 0) content-box, 
+                linear-gradient(#fff 0 0);
+            mask: 
+                linear-gradient(#fff 0 0) content-box, 
+                linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+        }
+
+        /* 懸浮效果 */
+        .gradient-border-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .gradient-border-button:hover::before {
+            background: linear-gradient(
+                45deg,
+                #8B5CF6,
+                #EC4899,
+                #8B5CF6
+            );
+        }
+
+        /* 動畫效果 */
+        @keyframes borderRotate {
+            from { background-position: 0% center; }
+            to { background-position: 200% center; }
+        }
+
+        .gradient-border-card::before,
+        .gradient-border-button::before {
+            background-size: 200% auto;
+            animation: borderRotate 4s linear infinite;
+        }
+
+        /* 進度條樣式 */
+        .progress-bar {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 9999px;
+            overflow: hidden;
+            height: 8px;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6D28D9, #DB2777);
+            border-radius: 9999px;
+            transition: width 0.3s ease;
+        }
+
+        /* 閃光效果 */
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            transform: translateX(-100%);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        /* 更新的樣式 */
+        .modern-progress {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 999px;
+            padding: 2px;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .modern-progress-bar {
+            height: 6px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #6D28D9, #DB2777);
+            transition: width 0.3s ease;
+            position: relative;
+        }
+
+        .stress-gradient {
+            background: linear-gradient(90deg, #10B981, #F59E0B, #EF4444);
+        }
+
+        .title-badge {
+            background: rgba(109, 40, 217, 0.2);
+            border: 1px solid rgba(109, 40, 217, 0.3);
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            color: #A78BFA;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 按鈕懸浮效果優化 */
+        .gradient-border-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .gradient-border-button:active {
+            transform: translateY(0);
+        }
+
+        /* 卡片動畫效果 */
+        @keyframes cardFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .gradient-border-card {
+            animation: cardFloat 4s ease-in-out infinite;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 
-<body class="bg-gradient-to-br from-gray-900 via-purple-900 to-pink-900 text-white min-h-screen">
-    <!-- 頂部導航 -->
-    <nav class="p-4">
-        <h1 class="text-3xl font-bold text-center">離職小幫手</h1>
-        <p class="text-center text-gray-300 mt-2">幫你做出最佳職涯決策</p>
-    </nav>
+<body class="font-['Noto_Sans_TC'] text-gray-100">
+    <div class="container mx-auto p-4 max-w-7xl">
+        <!-- 頂部狀態列 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- 等級卡片 -->
+            <div class="gradient-border-card p-6 relative overflow-hidden group">
+                <div class="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <h2 class="text-xl font-bold flex items-center gap-2 mb-4">
+                    <i class="fas fa-crown text-yellow-400 animate-pulse"></i>
+                    等級
+                </h2>
+                <div class="flex flex-col items-center relative z-10">
+                    <div class="text-4xl font-bold mb-2">
+                        Lv.<span id="levelDisplay">1</span>
+                    </div>
+                    <div id="titleDisplay" class="title-badge mb-4">
+                        職場新鮮人
+                    </div>
+                    <div class="w-full">
+                        <div class="modern-progress">
+                            <div id="expBar" class="modern-progress-bar"></div>
+                        </div>
+                        <div class="flex justify-between text-sm mt-2 text-gray-400">
+                            <span><span id="expCurrent">0</span>/<span id="expTotal">100</span></span>
+                            <span>下一級還需 <span id="expToNext">100</span> 經驗</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <!-- 主要內容區 -->
-    <main class="container mx-auto px-4 py-8">
-        <!-- 狀態面板 -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white/10 p-4 rounded-lg">
-                <h2 class="font-bold flex items-center">
-                    <i class="fas fa-trophy text-yellow-500 mr-2"></i>等級
+            <!-- 心情統計卡片 -->
+            <div class="gradient-border-card p-6">
+                <h2 class="text-xl font-bold flex items-center gap-2 mb-4">
+                    <i class="fas fa-heart text-pink-400 animate-pulse"></i>
+                    今日心情
                 </h2>
-                <div id="level" class="text-2xl mt-2">Lv.1</div>
-                <div id="title" class="text-sm text-gray-300">
-                    <i class="fas fa-star text-yellow-400 mr-1"></i>
-                    職場新鮮人
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="text-center p-4 bg-white/5 rounded-xl">
+                        <div class="text-3xl mb-2">😊</div>
+                        <div class="text-sm text-gray-400">開心</div>
+                        <div id="happyCount" class="text-2xl font-bold text-green-400">0</div>
+                    </div>
+                    <div class="text-center p-4 bg-white/5 rounded-xl">
+                        <div class="text-3xl mb-2">😡</div>
+                        <div class="text-sm text-gray-400">生氣</div>
+                        <div id="angryCount" class="text-2xl font-bold text-red-400">0</div>
+                    </div>
                 </div>
             </div>
-            <div class="bg-white/10 p-4 rounded-lg">
-                <h2 class="font-bold flex items-center">
-                    <i class="fas fa-battery-three-quarters text-green-500 mr-2"></i>精力
+
+            <!-- 壓力指數卡片 -->
+            <div class="gradient-border-card p-6">
+                <h2 class="text-xl font-bold flex items-center gap-2 mb-4">
+                    <i class="fas fa-gauge-high text-orange-400 animate-pulse"></i>
+                    壓力指數
                 </h2>
-                <div class="relative pt-1">
-                    <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-700">
-                        <div id="energyBar"
-                            class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500 w-full transition-all duration-300">
-                        </div>
+                <div class="text-center">
+                    <div id="stressValue" class="text-4xl font-bold mb-4">0%</div>
+                    <div class="modern-progress">
+                        <div id="stressBar" class="modern-progress-bar stress-gradient"></div>
                     </div>
-                    <div id="energy" class="text-2xl">100/100</div>
-                </div>
-            </div>
-            <div class="bg-white/10 p-4 rounded-lg">
-                <h2 class="font-bold flex items-center">
-                    <i class="fas fa-heart text-red-500 mr-2"></i>心情
-                </h2>
-                <div class="relative pt-1">
-                    <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-700">
-                        <div id="moodBar"
-                            class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-yellow-500 w-full transition-all duration-300">
-                        </div>
-                    </div>
-                    <div id="mood" class="text-2xl">100/100</div>
-                </div>
-            </div>
-            <div class="bg-white/10 p-4 rounded-lg">
-                <h2 class="font-bold flex items-center">
-                    <i class="fas fa-door-open text-purple-500 mr-2"></i>離職進度
-                </h2>
-                <div class="relative pt-1">
-                    <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-700">
-                        <div id="quitBar"
-                            class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500 w-0 transition-all duration-300">
-                        </div>
-                    </div>
-                    <div id="quitProgress" class="text-2xl">0%</div>
                 </div>
             </div>
         </div>
 
-        <!-- 打卡系統 -->
-        <div class="bg-white/10 p-6 rounded-lg mb-8">
-            <h2 class="text-xl font-bold mb-4 flex items-center">
-                <i class="fas fa-calendar-check text-blue-500 mr-2"></i>今日打卡
-            </h2>
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <div class="space-y-2">
-                    <button id="punchIn"
-                        class="w-full bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg transition-colors flex items-center justify-center">
-                        <i class="fas fa-angry mr-2"></i>
-                        不爽打卡
+        <!-- 按鈕區域 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- 壓力源 -->
+            <div class="space-y-4">
+                <h3 class="text-xl font-bold flex items-center gap-2">
+                    <i class="fas fa-bomb text-red-400"></i>
+                    壓力源
+                </h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- 加班按鈕 -->
+                    <button id="overtimeBtn" class="gradient-border-button group">
+                        <div class="relative z-10 flex flex-col items-center">
+                            <div class="text-3xl mb-2 group-hover:animate-bounce">⏰</div>
+                            <div class="font-bold mb-1">加班</div>
+                            <div class="text-sm px-3 py-1 bg-red-500/20 rounded-full text-red-400">
+                                +15 壓力值
+                            </div>
+                        </div>
                     </button>
-                    <div class="text-center text-sm text-gray-300">剩餘次數: <span id="punchInCount">3</span></div>
+
+                    <!-- 會議按鈕 -->
+                    <button id="meetingBtn" class="gradient-border-button group">
+                        <div class="relative z-10 flex flex-col items-center">
+                            <div class="text-3xl mb-2 group-hover:animate-bounce">👥</div>
+                            <div class="font-bold mb-1">會議</div>
+                            <div class="text-sm px-3 py-1 bg-red-500/20 rounded-full text-red-400">
+                                +10 壓力值
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- 被罵按鈕 -->
+                    <button id="scoldedBtn" class="gradient-border-button group">
+                        <div class="relative z-10 flex flex-col items-center">
+                            <div class="text-3xl mb-2 group-hover:animate-bounce">😠</div>
+                            <div class="font-bold mb-1">被罵</div>
+                            <div class="text-sm px-3 py-1 bg-red-500/20 rounded-full text-red-400">
+                                +20 壓力值
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- 被雷按鈕 -->
+                    <button id="troubleBtn" class="gradient-border-button group">
+                        <div class="relative z-10 flex flex-col items-center">
+                            <div class="text-3xl mb-2 group-hover:animate-bounce">⚡</div>
+                            <div class="font-bold mb-1">被雷</div>
+                            <div class="text-sm px-3 py-1 bg-red-500/20 rounded-full text-red-400">
+                                +12 壓力值
+                            </div>
+                        </div>
+                    </button>
                 </div>
-                <div class="space-y-2">
-                    <button id="overtime"
-                        class="w-full bg-pink-600 hover:bg-pink-700 px-6 py-3 rounded-lg transition-colors flex items-center justify-center">
-                        <i class="fas fa-clock mr-2"></i>
-                        加班打卡
+            </div>
+
+            <!-- 激勵源 -->
+            <div class="space-y-4">
+                <h3 class="text-xl font-bold flex items-center gap-2">
+                    <i class="fas fa-star text-yellow-400"></i>
+                    激勵源
+                </h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- 發薪按鈕 -->
+                    <button id="salaryBtn" class="gradient-border-button group">
+                        <div class="relative z-10 flex flex-col items-center">
+                            <div class="text-3xl mb-2 group-hover:animate-bounce">💰</div>
+                            <div class="font-bold mb-1">發薪</div>
+                            <div class="text-sm px-3 py-1 bg-green-500/20 rounded-full text-green-400">
+                                -30 壓力值
+                            </div>
+                        </div>
                     </button>
-                    <div class="text-center text-sm text-gray-300">剩餘次數: <span id="overtimeCount">3</span></div>
-                </div>
-                <div class="space-y-2">
-                    <button id="meeting"
-                        class="w-full bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg transition-colors flex items-center justify-center">
-                        <i class="fas fa-users mr-2"></i>
-                        會議打卡
+
+                    <!-- 獎金按鈕 -->
+                    <button id="bonusBtn" class="gradient-border-button group">
+                        <div class="relative z-10 flex flex-col items-center">
+                            <div class="text-3xl mb-2 group-hover:animate-bounce">🎁</div>
+                            <div class="font-bold mb-1">獎金</div>
+                            <div class="text-sm px-3 py-1 bg-green-500/20 rounded-full text-green-400">
+                                -25 壓力值
+                            </div>
+                        </div>
                     </button>
-                    <div class="text-center text-sm text-gray-300">剩餘次數: <span id="meetingCount">3</span></div>
-                </div>
-                <div class="space-y-2">
-                    <button id="scolded"
-                        class="w-full bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg transition-colors flex items-center justify-center">
-                        <i class="fas fa-bullhorn mr-2"></i>
-                        被罵打卡
+
+                    <!-- 升職按鈕 -->
+                    <button id="promotionBtn" class="gradient-border-button group">
+                        <div class="relative z-10 flex flex-col items-center">
+                            <div class="text-3xl mb-2 group-hover:animate-bounce">⭐</div>
+                            <div class="font-bold mb-1">升職</div>
+                            <div class="text-sm px-3 py-1 bg-green-500/20 rounded-full text-green-400">
+                                -40 壓力值
+                            </div>
+                        </div>
                     </button>
-                    <div class="text-center text-sm text-gray-300">剩餘次數: <span id="scoldedCount">3</span></div>
-                </div>
-                <div class="space-y-2">
-                    <button id="annoyed"
-                        class="w-full bg-orange-600 hover:bg-orange-700 px-6 py-3 rounded-lg transition-colors flex items-center justify-center">
-                        <i class="fas fa-bolt mr-2"></i>
-                        被同事雷
+
+                    <!-- 休假按鈕 -->
+                    <button id="vacationBtn" class="gradient-border-button group">
+                        <div class="relative z-10 flex flex-col items-center">
+                            <div class="text-3xl mb-2 group-hover:animate-bounce">✈️</div>
+                            <div class="font-bold mb-1">休假</div>
+                            <div class="text-sm px-3 py-1 bg-green-500/20 rounded-full text-green-400">
+                                -35 壓力值
+                            </div>
+                        </div>
                     </button>
-                    <div class="text-center text-sm text-gray-300">剩餘次數: <span id="annoyedCount">3</span></div>
                 </div>
             </div>
         </div>
 
-        <!-- 職場迷因 -->
-        <div class="bg-white/10 p-6 rounded-lg mb-8">
-            <h2 class="text-xl font-bold mb-4 flex items-center">
-                <i class="fas fa-comment-dots text-green-500 mr-2"></i>今日職場迷因
-            </h2>
-            <button id="generateMeme"
-                class="w-full bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg transition-colors flex items-center justify-center">
-                <i class="fas fa-random mr-2"></i>
-                產生迷因
+        <!-- 分享按鈕 -->
+        <div class="text-center mt-8">
+            <button id="shareBtn" class="gradient-border-button inline-flex items-center gap-2 px-8 py-4 text-lg">
+                <i class="fas fa-share-alt"></i>
+                分享進度
             </button>
-            <div id="memeResult"
-                class="mt-4 text-center text-xl p-4 bg-white/5 rounded-lg min-h-[4rem] flex items-center justify-center">
-            </div>
         </div>
+    </div>
 
-        <div class="bg-white/10 p-6 rounded-lg mb-8">
-            <h2 class="text-xl font-bold mb-4 flex items-center">
-                <i class="fas fa-quote-right text-indigo-500 mr-2"></i>今日離職小語
-            </h2>
-            <button id="generateQuote"
-                class="w-full bg-indigo-600 hover:bg-indigo-700 px-6 py-3 rounded-lg transition-colors flex items-center justify-center">
-                <i class="fas fa-lightbulb mr-2"></i>
-                產生離職小語
-            </button>
-            <div id="quoteResult"
-                class="mt-4 text-center text-xl p-4 bg-white/5 rounded-lg min-h-[4rem] flex items-center justify-center">
-            </div>
-        </div>
+    <script>
+    // 全局狀態
+    let state = null;
 
-        <!-- 工作日誌 -->
-        <div class="bg-white/10 p-6 rounded-lg">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold flex items-center">
-                    <i class="fas fa-book text-yellow-500 mr-2"></i>工作日誌
-                </h2>
-                <span class="text-sm text-gray-300">
-                    <i class="fas fa-pen-fancy mr-1"></i>
-                    記錄你的職場生活
-                </span>
-            </div>
-            <div id="eventLog" class="space-y-2 max-h-40 overflow-y-auto">
-                <!-- 日誌內容會在這裡動態添加 -->
-            </div>
-        </div>
-    </main>
+    // 初始化狀態
+    function initializeState() {
+        try {
+            const savedState = localStorage.getItem('quitJobState');
+            if (savedState) {
+                state = JSON.parse(savedState);
+            } else {
+                state = {
+                    level: 1,
+                    exp: 0,
+                    expToNextLevel: 100,
+                    stress: 0,
+                    dailyStats: {
+                        happy: 0,
+                        angry: 0
+                    }
+                };
+            }
+            console.log('初始化狀態成功:', state);
+        } catch (error) {
+            console.error('初始化狀態失敗:', error);
+        }
+    }
 
-    <!-- 頁腳 -->
-    <footer class="text-center py-4 text-gray-400 text-sm">
-        <p>
-            <i class="fas fa-code mr-1"></i>
-            離職小幫手 v1.0 - 讓工作生活更有趣
-            <i class="fas fa-heart ml-1 text-red-500"></i>
-        </p>
-    </footer>
+    // 綁定按鈕事件
+    function bindButtons() {
+        // 壓力源按鈕
+        document.getElementById('overtimeBtn')?.addEventListener('click', () => handleStressButton(15, '加班'));
+        document.getElementById('meetingBtn')?.addEventListener('click', () => handleStressButton(10, '會議'));
+        document.getElementById('scoldedBtn')?.addEventListener('click', () => handleStressButton(20, '被罵'));
+        document.getElementById('troubleBtn')?.addEventListener('click', () => handleStressButton(12, '被雷'));
+
+        // 激勵源按鈕
+        document.getElementById('salaryBtn')?.addEventListener('click', () => handleEncourageButton(30, '發薪'));
+        document.getElementById('bonusBtn')?.addEventListener('click', () => handleEncourageButton(25, '獎金'));
+        document.getElementById('promotionBtn')?.addEventListener('click', () => handleEncourageButton(40, '升職'));
+        document.getElementById('vacationBtn')?.addEventListener('click', () => handleEncourageButton(35, '休假'));
+
+        // 分享按鈕
+        document.getElementById('shareBtn')?.addEventListener('click', handleShare);
+    }
+
+    // 處理壓力按鈕點擊
+    function handleStressButton(value, action) {
+        if (!state) return;
+        
+        // 更新心情統計
+        state.dailyStats.angry++;
+        
+        // 增加經驗值
+        addExperience(value);
+        
+        // 增加壓力
+        state.stress = Math.min(100, state.stress + value);
+        
+        // 更新 UI
+        updateUI();
+        
+        // 顯示提示
+        showToast(`${action}！+${value} 經驗值，+${value} 壓力值`);
+        
+        // 保存狀態
+        saveState();
+    }
+
+    // 處理激勵按鈕點擊
+    function handleEncourageButton(value, action) {
+        if (!state) return;
+        
+        // 更新心情統計
+        state.dailyStats.happy++;
+        
+        // 增加經驗值
+        addExperience(value);
+        
+        // 減少壓力
+        state.stress = Math.max(0, state.stress - value);
+        
+        // 更新 UI
+        updateUI();
+        
+        // 顯示提示
+        showToast(`${action}！+${value} 經驗值，-${value} 壓力值`);
+        
+        // 保存狀態
+        saveState();
+    }
+
+    // 添加經驗值
+    function addExperience(exp) {
+        if (!state) return;
+        
+        const oldTitle = getCurrentTitle(state.level);
+        state.exp += exp;
+        
+        // 檢查升級
+        while (state.exp >= state.expToNextLevel) {
+            state.level += 1;
+            state.exp -= state.expToNextLevel;
+            state.expToNextLevel = Math.floor(state.expToNextLevel * 1.2);
+            
+            const newTitle = getCurrentTitle(state.level);
+            
+            // 升級提示
+            Swal.fire({
+                title: '等級提升！',
+                html: `
+                    恭喜你升到 ${state.level} 級！<br>
+                    ${oldTitle.name !== newTitle.name ? `<div class="mt-2">獲得新稱號：<span class="text-yellow-400">${newTitle.name}</span></div>` : ''}
+                `,
+                icon: 'success',
+                background: '#1A1625',
+                color: '#FFFFFF',
+                confirmButtonColor: '#6D28D9'
+            });
+        }
+    }
+
+    // 更新 UI
+    function updateUI() {
+        if (!state) return;
+        
+        // 更新等級和稱號
+        const levelDisplay = document.getElementById('levelDisplay');
+        const titleDisplay = document.getElementById('titleDisplay');
+        if (levelDisplay) {
+            levelDisplay.textContent = state.level;
+        }
+        if (titleDisplay) {
+            const currentTitle = getCurrentTitle(state.level);
+            titleDisplay.textContent = currentTitle.name;
+            
+            // 根據稱號等級設置不同的顏色
+            const colors = {
+                1: 'text-gray-400 bg-gray-500/20',
+                5: 'text-blue-400 bg-blue-500/20',
+                10: 'text-green-400 bg-green-500/20',
+                15: 'text-yellow-400 bg-yellow-500/20',
+                20: 'text-orange-400 bg-orange-500/20',
+                25: 'text-red-400 bg-red-500/20',
+                30: 'text-purple-400 bg-purple-500/20',
+                35: 'text-pink-400 bg-pink-500/20',
+                40: 'text-indigo-400 bg-indigo-500/20',
+                45: 'text-cyan-400 bg-cyan-500/20',
+                50: 'text-amber-400 bg-amber-500/20'
+            };
+            
+            titleDisplay.className = `text-sm px-3 py-1 rounded-full ${colors[currentTitle.level] || colors[1]}`;
+        }
+        
+        // 更新經驗值
+        const expPercentage = (state.exp / state.expToNextLevel) * 100;
+        document.getElementById('expBar').style.width = `${expPercentage}%`;
+        document.getElementById('expCurrent').textContent = state.exp;
+        document.getElementById('expTotal').textContent = state.expToNextLevel;
+        document.getElementById('expToNext').textContent = state.expToNextLevel - state.exp;
+        
+        // 更新心情統計
+        document.getElementById('happyCount').textContent = state.dailyStats.happy;
+        document.getElementById('angryCount').textContent = state.dailyStats.angry;
+        
+        // 更新壓力值
+        document.getElementById('stressBar').style.width = `${state.stress}%`;
+        document.getElementById('stressValue').textContent = `${state.stress}%`;
+    }
+
+    // 顯示提示
+    function showToast(message) {
+        Swal.fire({
+            text: message,
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            background: '#1A1625',
+            color: '#FFFFFF'
+        });
+    }
+
+    // 保存狀態
+    function saveState() {
+        if (state) {
+            localStorage.setItem('quitJobState', JSON.stringify(state));
+        }
+    }
+
+    // 處理分享功能
+    async function handleShare() {
+        try {
+            // 詢問暱稱，設定預設值為「匿名社畜」
+            const { value: nickname, isDismissed } = await Swal.fire({
+                title: '分享你的離職進度',
+                input: 'text',
+                inputLabel: '你的暱稱',
+                inputValue: '匿名社畜', // 預設值
+                inputPlaceholder: '請輸入暱稱',
+                inputAttributes: {
+                    maxlength: '20'
+                },
+                background: '#1A1625',
+                color: '#FFFFFF',
+                confirmButtonColor: '#6D28D9',
+                showCancelButton: true,
+                cancelButtonText: '取消',
+                confirmButtonText: '生成圖片',
+                // 移除驗證，允許使用預設暱稱
+                showClass: {
+                    popup: 'animate__animated animate__fadeIn animate__faster'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOut animate__faster'
+                }
+            });
+
+            // 用戶點擊取消
+            if (isDismissed) return;
+
+            // 使用輸入的暱稱或預設值
+            const finalNickname = nickname || '匿名社畜';
+
+            // 顯示載入中
+            Swal.fire({
+                title: '生成分享圖片中...',
+                text: '請稍候',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                background: '#1A1625',
+                color: '#FFFFFF',
+                willOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            const imageUrl = await generateShareCard(finalNickname);
+
+            // 顯示預覽
+            Swal.fire({
+                title: '分享預覽',
+                imageUrl: imageUrl,
+                imageWidth: 600,
+                imageAlt: '離職進度分享',
+                background: '#1A1625',
+                color: '#FFFFFF',
+                showDenyButton: true,
+                showCancelButton: true,
+                confirmButtonText: '下載圖片',
+                denyButtonText: '複製圖片',
+                cancelButtonText: '取消',
+                confirmButtonColor: '#6D28D9',
+                denyButtonColor: '#DB2777',
+                cancelButtonColor: '#4B5563'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    // 下載圖片
+                    const link = document.createElement('a');
+                    link.download = `離職進度_${finalNickname}_${new Date().toLocaleDateString()}.png`;
+                    link.href = imageUrl;
+                    link.click();
+                    
+                    // 顯示下載成功提示
+                    Swal.fire({
+                        title: '下載成功！',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        background: '#1A1625',
+                        color: '#FFFFFF'
+                    });
+                } else if (result.isDenied) {
+                    // 複製圖片到剪貼簿
+                    try {
+                        const blob = await (await fetch(imageUrl)).blob();
+                        await navigator.clipboard.write([
+                            new ClipboardItem({ 'image/png': blob })
+                        ]);
+                        Swal.fire({
+                            title: '已複製到剪貼簿',
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            background: '#1A1625',
+                            color: '#FFFFFF'
+                        });
+                    } catch (error) {
+                        console.error('複製圖片失敗:', error);
+                        Swal.fire({
+                            title: '複製失敗',
+                            text: '請使用下載功能',
+                            icon: 'error',
+                            background: '#1A1625',
+                            color: '#FFFFFF'
+                        });
+                    }
+                }
+            });
+
+        } catch (error) {
+            console.error('分享失敗:', error);
+            Swal.fire({
+                title: '分享失敗',
+                text: '生成圖片時發生錯誤',
+                icon: 'error',
+                background: '#1A1625',
+                color: '#FFFFFF'
+            });
+        }
+    }
+
+    async function generateShareCard(nickname) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1200;
+        canvas.height = 630;
+        const ctx = canvas.getContext('2d');
+
+        // 繪製漸層背景
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        gradient.addColorStop(0, '#6D28D9');
+        gradient.addColorStop(1, '#DB2777');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 添加裝飾效果
+        ctx.beginPath();
+        ctx.arc(0, 0, 400, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(canvas.width, canvas.height, 300, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.fill();
+
+        // 繪製標題和暱稱
+        ctx.textAlign = 'center';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.font = 'bold 48px "Noto Sans TC"';
+        ctx.fillText(`${nickname} 的離職進度`, canvas.width / 2, 80);
+
+        // 繪製等級和稱號
+        const currentTitle = getCurrentTitle(state.level);
+        ctx.font = 'bold 36px "Noto Sans TC"';
+        ctx.fillText(`Lv.${state.level} · ${currentTitle.name}`, canvas.width / 2, 140);
+
+        // 繪製經驗值進度條
+        const drawProgressBar = (x, y, width, height, progress, color1, color2, label) => {
+            // 進度條背景
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.roundRect(x, y, width, height, height/2);
+            ctx.fill();
+
+            // 進度條填充
+            const barGradient = ctx.createLinearGradient(x, 0, x + width, 0);
+            barGradient.addColorStop(0, color1);
+            barGradient.addColorStop(1, color2);
+            ctx.fillStyle = barGradient;
+            ctx.roundRect(x, y, width * progress, height, height/2);
+            ctx.fill();
+
+            // 進度條標籤
+            ctx.font = '24px "Noto Sans TC"';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.textAlign = 'left';
+            ctx.fillText(label, x, y - 10);
+        };
+
+        // 繪製各種進度條
+        const barWidth = 800;
+        const barHeight = 20;
+        let currentY = 200;
+        const barSpacing = 80;
+
+        // 經驗值進度條
+        const expProgress = state.exp / state.expToNextLevel;
+        drawProgressBar(
+            (canvas.width - barWidth) / 2,
+            currentY,
+            barWidth,
+            barHeight,
+            expProgress,
+            '#F59E0B',
+            '#DB2777',
+            `經驗值：${state.exp}/${state.expToNextLevel}`
+        );
+        currentY += barSpacing;
+
+        // 壓力指數進度條
+        const stressProgress = state.stress / 100;
+        drawProgressBar(
+            (canvas.width - barWidth) / 2,
+            currentY,
+            barWidth,
+            barHeight,
+            stressProgress,
+            '#10B981',
+            '#EF4444',
+            `壓力指數：${state.stress}%`
+        );
+        currentY += barSpacing;
+
+        // 心情統計
+        ctx.textAlign = 'center';
+        ctx.font = '32px "Noto Sans TC"';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.fillText(
+            `今日心情統計：😊 ${state.dailyStats.happy} | 😡 ${state.dailyStats.angry}`,
+            canvas.width / 2,
+            currentY + 20
+        );
+        currentY += barSpacing;
+
+        // 添加成就或其他統計
+        if (state.achievements) {
+            ctx.fillText(
+                `解鎖成就：${state.achievements} 個`,
+                canvas.width / 2,
+                currentY + 20
+            );
+        }
+
+        // 添加時間戳記
+        ctx.font = '24px "Noto Sans TC"';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        const date = new Date().toLocaleDateString('zh-TW', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        ctx.fillText(date, canvas.width / 2, canvas.height - 80);
+
+        // 添加 QR Code
+        const qr = await new Promise((resolve) => {
+            QRCode.toCanvas(
+                document.createElement('canvas'),
+                window.location.href,
+                {
+                    width: 150,
+                    margin: 0,
+                    color: {
+                        dark: '#FFFFFF',
+                        light: '#00000000'
+                    }
+                },
+                (error, canvas) => resolve(canvas)
+            );
+        });
+
+        // 繪製 QR Code 背景
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.roundRect(
+            canvas.width - 200,
+            canvas.height - 200,
+            150,
+            150,
+            10
+        );
+        ctx.fill();
+
+        // 繪製 QR Code
+        ctx.drawImage(
+            qr,
+            canvas.width - 200,
+            canvas.height - 200,
+            150,
+            150
+        );
+
+        // 添加掃描提示文字
+        ctx.font = '16px "Noto Sans TC"';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.fillText(
+            '掃描 QR Code 開始你的離職之旅',
+            canvas.width - 125,
+            canvas.height - 20
+        );
+
+        return canvas.toDataURL('image/png');
+    }
+
+    // 添加稱號系統
+    const TITLES = [
+        { level: 1, name: '職場新鮮人' },
+        { level: 5, name: '初心社畜' },
+        { level: 10, name: '資深社畜' },
+        { level: 15, name: '厭世大師' },
+        { level: 20, name: '離職預備軍' },
+        { level: 25, name: '職場達人' },
+        { level: 30, name: '離職大師' },
+        { level: 35, name: '職場之神' },
+        { level: 40, name: '自由之魂' },
+        { level: 45, name: '人生勝利組' },
+        { level: 50, name: '財富自由人' }
+    ];
+
+    // 獲取當前等級對應的稱號
+    function getCurrentTitle(level) {
+        return TITLES.reduce((current, title) => {
+            if (level >= title.level && title.level >= current.level) {
+                return title;
+            }
+            return current;
+        }, TITLES[0]);
+    }
+
+    // 頁面載入時初始化
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeState();
+        bindButtons();
+        updateUI();
+    });
+    </script>
 </body>
 
 </html>

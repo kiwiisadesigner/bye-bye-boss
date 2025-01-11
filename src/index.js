@@ -1,244 +1,471 @@
-import './styles.css';
-
-// 遊戲狀態
-const gameState = {
-    level: 1,
-    title: '職場新鮮人',
-    energy: parseInt(process.env.MAX_ENERGY) || 100,
-    mood: parseInt(process.env.MAX_MOOD) || 100,
-    quitProgress: 0,
-    maxEnergy: parseInt(process.env.MAX_ENERGY) || 100,
-    maxMood: parseInt(process.env.MAX_MOOD) || 100,
-    events: [],
-    punchIns: 0,
-    dailyPunchIns: {
-        不爽: 0,
-        加班: 0,
-        會議: 0,
-        被罵: 0,
-        被同事雷: 0
-    },
-    maxDailyPunchIns: parseInt(process.env.MAX_DAILY_PUNCH_INS) || 3
-};
-
-// 職場迷因列表
-const memes = [
-    "「這個很簡單」 = 這個很麻煩",
-    "「幫我看一下」 = 幫我做完",
-    "「盡快完成」 = 現在立刻馬上",
-    "「下班前做完」 = 加班吧你",
-    "「我們是一個團隊」 = 你要配合我",
-    "「這是一個機會」 = 有麻煩了",
-    "「我只是建議」 = 這是命令",
-    "「開個小會」 = 浪費兩小時",
-    "「這個很急」 = 我拖了三天",
-    "「我們研究一下」 = 我也不知道"
-];
-
-// 離職小語列表
-const quitQuotes = [
-    "加班不是我工作能力差，是你工作分配有問題",
-    "工作要確實，離職要即時",
-    "如果是欣梅爾，也會離職的",
-    "工作教會我的第一課是 deadline，第二課是如何假裝它不存在。",
-    "『我們是一個團隊』的意思是，你要幫忙加班，而別人已經下班了。",
-    "我的工作分兩部分：在會議裡浪費時間，和用剩下的時間補救浪費掉的進度。",
-    "對老闆來說，5分鐘能完成的事情，可能只是需要我重寫整個系統。",
-    "一個人要同時扮演專案經理、設計師、工程師，唯一缺的就是一個醫生。",
-    "工作中最大的壓力來自兩方面：白癡同事的行為，和我無法直接指出來。",
-    "你看到那邊那台法拉利了嗎？只要你今年也維持每週70小時的工時，明年你老闆就可以買得起了。",
-    "算我求你了，我想下班",
-    "吃了下午茶，就更有力氣加班了",
-    "為了避免同仁拿到年終就離職，今年我們就不發了",
-    "別人能者多勞，你就能者過勞",
-    "三分我努力，七分主管定，剩下九十靠親戚",
-    "工作只有你名字，升遷不關你的事"
-];
-
-// 初始化
-document.addEventListener('DOMContentLoaded', () => {
-    updateUI();
-    setupEventListeners();
-});
-
-// 更新 UI
-function updateUI() {
-    document.getElementById('level').textContent = `Lv.${gameState.level}`;
-    document.getElementById('title').textContent = gameState.title;
-    document.getElementById('energy').textContent = `${gameState.energy}/${gameState.maxEnergy}`;
-    document.getElementById('mood').textContent = `${gameState.mood}/${gameState.maxMood}`;
-    document.getElementById('quitProgress').textContent = `${gameState.quitProgress}%`;
-    
-    // 更新進度條
-    document.getElementById('energyBar').style.width = `${(gameState.energy / gameState.maxEnergy) * 100}%`;
-    document.getElementById('moodBar').style.width = `${(gameState.mood / gameState.maxMood) * 100}%`;
-    document.getElementById('quitBar').style.width = `${gameState.quitProgress}%`;
-    
-    // 更新進度條顏色
-    const energyBar = document.getElementById('energyBar');
-    const moodBar = document.getElementById('moodBar');
-    
-    // 精力條顏色
-    if (gameState.energy <= 30) {
-        energyBar.classList.replace('bg-green-500', 'bg-red-500');
-    } else if (gameState.energy <= 60) {
-        energyBar.classList.replace('bg-green-500', 'bg-yellow-500');
-    } else {
-        energyBar.classList.replace('bg-red-500', 'bg-green-500');
-        energyBar.classList.replace('bg-yellow-500', 'bg-green-500');
-    }
-    
-    // 心情條顏色
-    if (gameState.mood <= 30) {
-        moodBar.classList.replace('bg-yellow-500', 'bg-red-500');
-    } else if (gameState.mood <= 60) {
-        moodBar.classList.replace('bg-yellow-500', 'bg-orange-500');
-    } else {
-        moodBar.classList.replace('bg-red-500', 'bg-yellow-500');
-        moodBar.classList.replace('bg-orange-500', 'bg-yellow-500');
-    }
-
-    // 更新打卡次數顯示
-    document.getElementById('punchInCount').textContent = gameState.maxDailyPunchIns - gameState.dailyPunchIns['不爽'];
-    document.getElementById('overtimeCount').textContent = gameState.maxDailyPunchIns - gameState.dailyPunchIns['加班'];
-    document.getElementById('meetingCount').textContent = gameState.maxDailyPunchIns - gameState.dailyPunchIns['會議'];
-    document.getElementById('scoldedCount').textContent = gameState.maxDailyPunchIns - gameState.dailyPunchIns['被罵'];
-    document.getElementById('annoyedCount').textContent = gameState.maxDailyPunchIns - gameState.dailyPunchIns['被同事雷'];
-}
-
-// 設置事件監聽器
-function setupEventListeners() {
-    document.getElementById('punchIn').addEventListener('click', () => handlePunchIn('不爽'));
-    document.getElementById('overtime').addEventListener('click', () => handlePunchIn('加班'));
-    document.getElementById('meeting').addEventListener('click', () => handlePunchIn('會議'));
-    document.getElementById('scolded').addEventListener('click', () => handlePunchIn('被罵'));
-    document.getElementById('annoyed').addEventListener('click', () => handlePunchIn('被同事雷'));
-    
-    document.getElementById('generateMeme').addEventListener('click', generateMeme);
-    document.getElementById('generateQuote').addEventListener('click', generateQuote);
-}
-
-// 處理打卡
-function handlePunchIn(type) {
-    if (gameState.dailyPunchIns[type] >= gameState.maxDailyPunchIns) {
-        alert('今天這種打卡已經達到上限了！');
-        return;
-    }
-
-    gameState.dailyPunchIns[type]++;
-    
-    let message = '';
-    switch(type) {
-        case '不爽':
-            gameState.mood -= parseInt(process.env.MOOD_DECREASE_RATE) || 10;
-            gameState.quitProgress += parseInt(process.env.QUIT_PROGRESS_INCREASE_RATE) || 5;
-            message = '又是不爽的一天...';
-            break;
-        case '加班':
-            gameState.energy -= 15;
-            gameState.mood -= 15;
-            gameState.quitProgress += 10;
-            message = '今天又要加班！';
-            break;
-        case '會議':
-            gameState.energy -= 20;
-            gameState.mood -= 5;
-            message = '無止盡的會議...';
-            break;
-        case '被罵':
-            gameState.mood -= 25;
-            gameState.quitProgress += 15;
-            message = '今天被老闆罵了...';
-            break;
-        case '被同事雷':
-            gameState.mood -= 12;
-            gameState.energy -= 8;
-            gameState.quitProgress += 7;
-            message = '今天又被同事雷到了...';
-            break;
-    }
-
-    gameState.energy = Math.max(0, Math.min(100, gameState.energy));
-    gameState.mood = Math.max(0, Math.min(100, gameState.mood));
-    gameState.quitProgress = Math.min(100, gameState.quitProgress);
-
-    addToLog(message);
-    updateUI();
-    checkGameStatus();
-}
-
-// 產生迷因
-function generateMeme() {
-    const meme = memes[Math.floor(Math.random() * memes.length)];
-    const memeResult = document.getElementById('memeResult');
-    memeResult.textContent = meme;
-    memeResult.classList.add('animate-bounce');
-    setTimeout(() => memeResult.classList.remove('animate-bounce'), 1000);
-    addToLog('獲得新的職場迷因！');
-}
-
-// 產生離職小語
-function generateQuote() {
-    const quote = quitQuotes[Math.floor(Math.random() * quitQuotes.length)];
-    const quoteResult = document.getElementById('quoteResult');
-    quoteResult.textContent = quote;
-    quoteResult.classList.add('animate-fade-in');
-    setTimeout(() => quoteResult.classList.remove('animate-fade-in'), 1000);
-    addToLog('獲得一條離職小語！');
-}
-
-// 添加日誌
-function addToLog(message) {
-    const logDiv = document.getElementById('eventLog');
-    const entry = document.createElement('div');
-    entry.className = 'text-sm text-gray-300';
-    entry.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
-    logDiv.insertBefore(entry, logDiv.firstChild);
-}
-
-// 檢查遊戲狀態
-function checkGameStatus() {
-    if (gameState.energy <= 20) {
-        alert('你已經快精疲力竭了！該休息一下了。');
-    }
-    if (gameState.mood <= 20) {
-        alert('你的心情非常低落，要不要考慮請個假？');
-    }
-    if (gameState.quitProgress >= 100) {
-        alert('恭喜你！你已經準備好離職了！');
-        resetGame();
-    }
-}
-
-// 重置遊戲
-function resetGame() {
-    gameState.energy = parseInt(process.env.MAX_ENERGY) || 100;
-    gameState.mood = parseInt(process.env.MAX_MOOD) || 100;
-    gameState.quitProgress = 0;
-    gameState.level += 1;
-    gameState.title = updateTitle(gameState.level);
-    Object.keys(gameState.dailyPunchIns).forEach(key => {
-        gameState.dailyPunchIns[key] = 0;
-    });
-    updateUI();
-    addToLog('開始新的職場生活！');
-}
-
-// 更新職稱
-function updateTitle(level) {
-    const titles = {
-        1: '職場新鮮人',
-        3: '職場生存者',
-        5: '職場老手',
-        7: '職場達人',
-        10: '職場大師'
+// 等待 DOM 完全載入後再執行
+document.addEventListener('DOMContentLoaded', function() {
+    // 初始化狀態
+    let state = {
+        exp: 0,
+        level: 1,
+        expToNextLevel: 100,
+        stress: 0,
+        happyCount: 0,
+        angryCount: 0,
+        currentMood: '😊',
+        moodHistory: [],
+        checkInDays: 0,
+        achievements: 0,
+        lastCheckIn: null,
+        overtimeCount: 0,
+        salaryCount: 0,
+        promotionCount: 0,
+        happyStreak: 0
     };
-    
-    let title = '職場新鮮人';
-    for (let lvl in titles) {
-        if (level >= parseInt(lvl)) {
-            title = titles[lvl];
+
+    // 更新經驗值和等級
+    function updateExp(amount) {
+        console.log('獲得經驗值:', amount);
+        
+        state.exp += amount;
+        
+        // 檢查是否升級
+        while (state.exp >= state.expToNextLevel) {
+            state.exp -= state.expToNextLevel;
+            state.level += 1;
+            state.expToNextLevel = Math.floor(state.expToNextLevel * 1.2);
+            showLevelUpNotice(state.level);
+        }
+
+        // 更新UI
+        const expBar = document.getElementById('expBar');
+        const expText = document.getElementById('exp');
+        const levelText = document.getElementById('level');
+        
+        if (expBar && expText && levelText) {
+            const expPercentage = (state.exp / state.expToNextLevel) * 100;
+            expBar.style.width = `${expPercentage}%`;
+            expText.textContent = `${state.exp}/${state.expToNextLevel} EXP`;
+            levelText.textContent = `Lv.${state.level} 👑`;
         }
     }
-    return title;
+
+    // 更新壓力值
+    function updateStress(amount) {
+        // 根據當前壓力值調整增減幅度
+        let adjustedAmount = amount;
+        
+        // 當壓力值較高時，正面事件的效果更明顯
+        if (amount < 0 && state.stress > 70) {
+            adjustedAmount *= 1.2;  // 增加20%的減壓效果
+        }
+        
+        // 當壓力值較低時，負面事件的效果更明顯
+        if (amount > 0 && state.stress < 30) {
+            adjustedAmount *= 1.2;  // 增加20%的增壓效果
+        }
+        
+        state.stress = Math.max(0, Math.min(100, state.stress + adjustedAmount));
+        const stressBar = document.getElementById('stressBar');
+        const stressLevel = document.getElementById('stressLevel');
+        
+        if (stressBar && stressLevel) {
+            stressBar.style.width = `${state.stress}%`;
+            stressLevel.textContent = `${state.stress}%`;
+            
+            // 根據壓力值改變顏色
+            if (state.stress < 30) {
+                stressBar.className = 'shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-green-400 to-green-600 transition-all duration-500';
+            } else if (state.stress < 70) {
+                stressBar.className = 'shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-yellow-400 to-orange-500 transition-all duration-500';
+            } else {
+                stressBar.className = 'shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-orange-500 to-red-600 transition-all duration-500';
+            }
+        }
+    }
+
+    // 更新心情計數
+    function updateMoodCount(isHappy) {
+        const happyCount = document.getElementById('happyCount');
+        const angryCount = document.getElementById('angryCount');
+        
+        if (isHappy && happyCount) {
+            state.happyCount++;
+            happyCount.textContent = state.happyCount;
+        } else if (!isHappy && angryCount) {
+            state.angryCount++;
+            angryCount.textContent = state.angryCount;
+        }
+    }
+
+    // 顯示升級提示
+    function showLevelUpNotice(newLevel) {
+        const notice = document.getElementById('levelUpNotice');
+        const levelSpan = document.getElementById('newLevel');
+        
+        if (notice && levelSpan) {
+            levelSpan.textContent = newLevel;
+            notice.classList.remove('scale-0', 'opacity-0');
+            notice.classList.add('scale-100', 'opacity-100');
+            
+            setTimeout(() => {
+                notice.classList.remove('scale-100', 'opacity-100');
+                notice.classList.add('scale-0', 'opacity-0');
+            }, 3000);
+        }
+    }
+
+    // 綁定按鈕事件
+    const buttons = {
+        'overtimeBtn': { exp: 15, stress: 8, happy: false },
+        'meetingBtn': { exp: 10, stress: 5, happy: false },
+        'scoldedBtn': { exp: 20, stress: 12, happy: false },
+        'troubleBtn': { exp: 12, stress: 6, happy: false },
+        'salaryBtn': { exp: 30, stress: -15, happy: true },
+        'bonusBtn': { exp: 25, stress: -12, happy: true },
+        'promotionBtn': { exp: 40, stress: -20, happy: true },
+        'raiseBtn': { exp: 35, stress: -18, happy: true }
+    };
+
+    // 為每個按鈕添加事件監聽器
+    Object.entries(buttons).forEach(([btnId, values]) => {
+        const btn = document.getElementById(btnId);
+        if (btn) {
+            btn.addEventListener('click', () => {
+                console.log(`${btnId} 被點擊`);
+                updateExp(values.exp);
+                updateStress(values.stress);
+                updateMoodCount(values.happy);
+            });
+        }
+    });
+
+    // 初始化顯示
+    updateExp(0);
+    updateStress(0);
+
+    // 載入心情歷史
+    loadMoodHistory();
+    
+    // 如果當天還沒有選擇心情，顯示提示
+    const today = new Date().toLocaleDateString();
+    const hasRecordToday = state.moodHistory.some(record => 
+        new Date(record.date).toLocaleDateString() === today
+    );
+    
+    if (!hasRecordToday) {
+        // 可以添加一個提示，提醒用戶記錄今天的心情
+        const notice = document.createElement('div');
+        notice.className = 'text-yellow-400 text-sm mt-2';
+        notice.textContent = '別忘了記錄今天的心情！';
+        document.querySelector('.mood-btn').parentNode.appendChild(notice);
+    }
+
+    loadState();
+    updateCheckInStreak();
+    updateAchievementDisplay();
+});
+
+// 更新心情的函數
+function updateMoodEmoji(mood) {
+    console.log('更新心情:', mood); // 調試用
+    
+    state.currentMood = mood;
+    
+    // 添加到心情歷史記錄
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('zh-TW', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+    });
+    const dateStr = now.toLocaleDateString('zh-TW', { 
+        month: 'long', 
+        day: 'numeric' 
+    });
+    
+    const moodRecord = {
+        mood: mood,
+        time: timeStr,
+        date: dateStr
+    };
+    
+    state.moodHistory.unshift(moodRecord);
+    updateMoodHistory();
+    saveMoodHistory();
+}
+
+// 更新心情歷史記錄顯示
+function updateMoodHistory() {
+    const historyContainer = document.getElementById('moodHistory');
+    if (!historyContainer) return;
+    
+    historyContainer.innerHTML = state.moodHistory
+        .slice(0, 10) // 只顯示最近10筆記錄
+        .map(record => `
+            <div class="flex items-center justify-between p-2 rounded-lg bg-black/30">
+                <div class="flex items-center">
+                    <span class="text-2xl mr-3">${record.mood}</span>
+                    <span class="text-gray-300">${record.date}</span>
+                </div>
+                <span class="text-gray-400">${record.time}</span>
+            </div>
+        `)
+        .join('');
+}
+
+// 保存心情歷史到 localStorage
+function saveMoodHistory() {
+    localStorage.setItem('moodHistory', JSON.stringify(state.moodHistory));
+}
+
+// 載入心情歷史
+function loadMoodHistory() {
+    const savedHistory = localStorage.getItem('moodHistory');
+    if (savedHistory) {
+        state.moodHistory = JSON.parse(savedHistory);
+        updateMoodHistory();
+    }
+}
+
+// 更新打卡天數
+function updateCheckInStreak() {
+    const today = new Date().toDateString();
+    
+    if (state.lastCheckIn === null) {
+        state.checkInDays = 1;
+    } else if (state.lastCheckIn === new Date(Date.now() - 86400000).toDateString()) {
+        // 如果上次打卡是昨天
+        state.checkInDays++;
+        
+        // 檢查是否達到打卡成就
+        if (state.checkInDays === 7) {
+            unlockAchievement('連續打卡 7 天');
+        } else if (state.checkInDays === 30) {
+            unlockAchievement('連續打卡 30 天');
+        }
+    } else if (state.lastCheckIn !== today) {
+        // 如果不是連續打卡，重置計數
+        state.checkInDays = 1;
+    }
+    
+    state.lastCheckIn = today;
+    updateUI();
+    saveState();
+}
+
+// 解鎖成就
+function unlockAchievement(achievementName) {
+    state.achievements++;
+    updateUI();
+    
+    // 顯示成就解鎖通知
+    const notice = document.createElement('div');
+    notice.className = 'fixed top-4 right-4 bg-yellow-600/80 text-white px-6 py-4 rounded-lg shadow-lg backdrop-blur-lg z-50 transform transition-all duration-500';
+    notice.innerHTML = `
+        <div class="flex items-center">
+            <i class="fas fa-trophy text-yellow-300 text-2xl mr-3"></i>
+            <div>
+                <div class="font-bold">成就解鎖！</div>
+                <div class="text-sm">${achievementName}</div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(notice);
+    setTimeout(() => {
+        notice.style.opacity = '0';
+        setTimeout(() => notice.remove(), 500);
+    }, 3000);
+}
+
+// 更新 UI 顯示
+function updateUI() {
+    document.getElementById('checkInDays').textContent = state.checkInDays;
+    document.getElementById('achievements').textContent = state.achievements;
+}
+
+// 保存狀態
+function saveState() {
+    localStorage.setItem('workplaceRPG', JSON.stringify(state));
+}
+
+// 載入狀態
+function loadState() {
+    const savedState = localStorage.getItem('workplaceRPG');
+    if (savedState) {
+        state = {...state, ...JSON.parse(savedState)};
+        updateUI();
+    }
+}
+
+// 定義成就列表
+const ACHIEVEMENTS = {
+    // 打卡相關成就
+    CHECKIN_STREAK_7: {
+        id: 'checkin7',
+        name: '打卡新人',
+        description: '連續打卡 7 天',
+        icon: '📅',
+        condition: (state) => state.checkInDays >= 7,
+        unlocked: false
+    },
+    CHECKIN_STREAK_30: {
+        id: 'checkin30',
+        name: '打卡達人',
+        description: '連續打卡 30 天',
+        icon: '🎯',
+        condition: (state) => state.checkInDays >= 30,
+        unlocked: false
+    },
+    
+    // 等級相關成就
+    LEVEL_5: {
+        id: 'level5',
+        name: '職場新鮮人',
+        description: '達到 5 級',
+        icon: '⭐',
+        condition: (state) => state.level >= 5,
+        unlocked: false
+    },
+    LEVEL_10: {
+        id: 'level10',
+        name: '職場老手',
+        description: '達到 10 級',
+        icon: '🌟',
+        condition: (state) => state.level >= 10,
+        unlocked: false
+    },
+    
+    // 壓力相關成就
+    HIGH_STRESS: {
+        id: 'highStress',
+        name: '壓力山大',
+        description: '壓力值達到 100%',
+        icon: '😱',
+        condition: (state) => state.stress >= 100,
+        unlocked: false
+    },
+    STRESS_MASTER: {
+        id: 'stressMaster',
+        name: '心如止水',
+        description: '壓力值降到 0%',
+        icon: '🧘',
+        condition: (state) => state.stress <= 0,
+        unlocked: false
+    },
+    
+    // 心情相關成就
+    HAPPY_STREAK: {
+        id: 'happyStreak',
+        name: '快樂工作人',
+        description: '連續記錄 5 天開心心情',
+        icon: '😊',
+        condition: (state) => state.happyStreak >= 5,
+        unlocked: false
+    },
+    MOOD_MASTER: {
+        id: 'moodMaster',
+        name: '情緒管理大師',
+        description: '記錄 30 天的心情',
+        icon: '🎭',
+        condition: (state) => state.moodHistory.length >= 30,
+        unlocked: false
+    },
+    
+    // 特殊成就
+    OVERTIME_WARRIOR: {
+        id: 'overtimeWarrior',
+        name: '加班戰士',
+        description: '累積 10 次加班',
+        icon: '💪',
+        condition: (state) => state.overtimeCount >= 10,
+        unlocked: false
+    },
+    SALARY_MASTER: {
+        id: 'salaryMaster',
+        name: '領薪水達人',
+        description: '累積領取 12 次薪水',
+        icon: '💰',
+        condition: (state) => state.salaryCount >= 12,
+        unlocked: false
+    },
+    PROMOTION_MASTER: {
+        id: 'promotionMaster',
+        name: '升職之路',
+        description: '累積 3 次升職',
+        icon: '👔',
+        condition: (state) => state.promotionCount >= 3,
+        unlocked: false
+    },
+    PERFECT_EMPLOYEE: {
+        id: 'perfectEmployee',
+        name: '完美員工',
+        description: '解鎖所有其他成就',
+        icon: '👑',
+        condition: (state) => Object.values(ACHIEVEMENTS).filter(a => a.id !== 'perfectEmployee').every(a => a.unlocked),
+        unlocked: false
+    }
+};
+
+// 檢查成就
+function checkAchievements() {
+    let newUnlocks = false;
+    
+    Object.values(ACHIEVEMENTS).forEach(achievement => {
+        if (!achievement.unlocked && achievement.condition(state)) {
+            achievement.unlocked = true;
+            newUnlocks = true;
+            showAchievementUnlock(achievement);
+            state.achievements++;
+        }
+    });
+    
+    if (newUnlocks) {
+        updateAchievementDisplay();
+        saveState();
+    }
+}
+
+// 顯示成就解鎖通知
+function showAchievementUnlock(achievement) {
+    const notice = document.createElement('div');
+    notice.className = 'fixed top-4 right-4 bg-yellow-600/80 text-white px-6 py-4 rounded-lg shadow-lg backdrop-blur-lg z-50 transform transition-all duration-500';
+    notice.innerHTML = `
+        <div class="flex items-center">
+            <div class="text-3xl mr-3">${achievement.icon}</div>
+            <div>
+                <div class="font-bold">${achievement.name}</div>
+                <div class="text-sm">${achievement.description}</div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(notice);
+    setTimeout(() => {
+        notice.style.opacity = '0';
+        setTimeout(() => notice.remove(), 500);
+    }, 3000);
+}
+
+// 更新成就顯示
+function updateAchievementDisplay() {
+    const container = document.getElementById('achievementList');
+    if (!container) return;
+    
+    container.innerHTML = Object.values(ACHIEVEMENTS).map(achievement => `
+        <div class="flex items-center p-4 rounded-lg ${achievement.unlocked ? 'bg-yellow-900/30' : 'bg-black/30'} transition-colors duration-300">
+            <div class="text-3xl mr-4 ${achievement.unlocked ? 'opacity-100' : 'opacity-30'}">
+                ${achievement.icon}
+            </div>
+            <div class="flex-1">
+                <div class="font-bold ${achievement.unlocked ? 'text-yellow-400' : 'text-gray-400'}">
+                    ${achievement.name}
+                </div>
+                <div class="text-sm text-gray-400">
+                    ${achievement.description}
+                </div>
+            </div>
+            <div class="text-xl ${achievement.unlocked ? 'text-yellow-400' : 'text-gray-600'}">
+                <i class="fas ${achievement.unlocked ? 'fa-check-circle' : 'fa-lock'}"></i>
+            </div>
+        </div>
+    `).join('');
+    
+    document.getElementById('achievementCount').textContent = state.achievements;
 }
