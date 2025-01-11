@@ -661,22 +661,120 @@ body {
     transition: transform 0.3s ease-in-out;
 }
 
-.instagram-story-btn {
-    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+.reset-btn {
+    background: rgba(220, 38, 38, 0.3);
+    color: rgba(255, 255, 255, 0.4);
+    border: none;
+    padding: 1px 4px;
+    border-radius: 2px;
+    cursor: pointer;
+    font-weight: 300;
+    transition: all 0.2s;
+    font-size: 0.75em;
+    opacity: 0.3;
+    letter-spacing: -0.5px;
+    transform: scale(0.8);
+    text-transform: none;
+    box-shadow: none;
+    white-space: nowrap;
+    width: min-content;
+    min-width: min-content;
+    max-width: max-content;
+    line-height: 1;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.reset-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min-content;
+    height: 20px;
+    background: inherit;
+    border-radius: inherit;
+    z-index: -1;
+}
+
+.reset-btn:hover {
+    background: rgba(220, 38, 38, 0.5);
+    transform: scale(0.8);
+    opacity: 0.5;
+}
+
+.reset-btn:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+    margin: 20px 0;
+}
+
+/* 分享進度按鈕 - 更醒目 */
+.share-progress-btn {
+    background: linear-gradient(45deg, #6D28D9, #7c3aed);
     color: white;
     border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
+    padding: 14px 32px;  /* 加大padding */
+    border-radius: 12px;
     cursor: pointer;
     font-weight: bold;
-    margin-top: 16px;
-    transition: transform 0.2s;
+    font-size: 1.1em;    /* 加大字體 */
+    transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(109, 40, 217, 0.3);  /* 添加陰影 */
 }
 
-.instagram-story-btn:hover {
+.share-progress-btn:hover {
     transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(109, 40, 217, 0.4);
+    background: linear-gradient(45deg, #7c3aed, #8b5cf6);
 }
 
-.instagram-story-btn:active {
-    transform: translateY(0);
+/* 重置按鈕 - 較不醒目 */
+.reset-btn {
+    background: rgba(220, 38, 38, 0.9);  /* 降低透明度 */
+    color: white;
+    border: none;
+    padding: 6px 12px;   /* 縮小padding */
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: normal; /* 改為普通字重 */
+    transition: all 0.2s;
+    font-size: 0.85em;   /* 縮小字體 */
+    opacity: 0.85;       /* 降低整體透明度 */
+}
+
+.reset-btn:hover {
+    background: #ef4444;
+    transform: translateY(-1px);  /* 縮小位移效果 */
+    opacity: 1;
+}
+
+.quote-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 80px;        /* 增加容器高度 */
+    padding: 1.5rem;
+}
+
+.quote-text {
+    text-align: center;
+    width: 100%;
+    font-size: 1.25rem;      /* 更大的字體 */
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    font-weight: 500;        /* 稍微加粗 */
+    letter-spacing: 0.5px;   /* 增加字距 */
 }

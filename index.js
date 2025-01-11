@@ -23,27 +23,51 @@ const GAME_CONFIG = {
     ]
 };
 
-// 離職小語陣列
-const quotesList = [
-    "加班不是我工作能力差，是你工作分配有問題",
-    "工作要確實，離職要即時",
-    "如果是欣梅爾，也會離職的",
-    "工作教會我的第一課是 deadline，第二課是如何假裝它不存在",
-    "「我們是一個團隊」的意思是，你要幫忙加班，而別人已經下班了",
-    "我的工作分兩部分：在會議裡浪費時間，和用剩下的時間補救浪費掉的進度",
-    "對老闆來說，5分鐘能完成的事情，可能只是需要我重寫整個系統",
-    "一個人要同時扮演專案經理、設計師、工程師，唯一缺的就是一個醫生",
-    "工作中最大的壓力來自兩方面：白癡同事的行為，和我無法直接指出來",
-    "你看到那邊那台法拉利了嗎？只要你今年也維持每週70小時的工時，明年你老闆就可以買得起了",
-    "算我求你了，我想下班",
-    "吃了下午茶，就更有力氣加班了",
-    "為了避免同仁拿到年終就離職，今年我們就不發了",
-    "別人能者多勞，你就能者過勞",
-    "三分我努力，七分主管定，剩下九十靠親戚",
-    "工作只有你名字，升遷不關你的事"
+// 離職小語數據
+const quotes = [
+    '加班不是我工作能力差，是你工作分配有問題',
+    '工作要確實，離職要即時',
+    '如果是欣梅爾，也會離職的',
+    '工作教會我的第一課是 deadline，第二課是如何假裝它不存在',
+    '我們是一個團隊的意思是，你要幫忙加班，而別人已經下班了',
+    '我的工作分兩部分：在會議裡浪費時間，和用剩下的時間補救浪費掉的進度',
+    '對老闆來說，5分鐘能完成的事情，可能只是需要我重寫整個系統',
+    '一個人要同時扮演專案經理、設計師、工程師，唯一缺的就是一個醫生',
+    '工作中最大的壓力來自兩方面：白癡同事的行為，和我無法直接指出來',
+    '你看到那邊那台法拉利了嗎？只要你今年也維持每週70小時的工時，明年你老闆就可以買得起了',
+    '算我求你了，我想下班',
+    '吃了下午茶，就更有力氣加班了',
+    '為了避免同仁拿到年終就離職，今年我們就不發了',
+    '別人能者多勞，你就能者過勞',
+    '三分我努力，七分主管定，剩下九十靠親戚',
+    '工作只有你名字，升遷不關你的事'
 ];
 
 let currentQuoteIndex = 0;
+
+// 更新離職小語顯示
+function updateQuote() {
+    const quoteElement = document.querySelector('.quote-text');
+    if (quoteElement) {
+        // 隨機選擇一句，但避免重複
+        let newIndex;
+        do {
+            newIndex = Math.floor(Math.random() * quotes.length);
+        } while (newIndex === currentQuoteIndex);
+        
+        currentQuoteIndex = newIndex;
+        quoteElement.textContent = quotes[currentQuoteIndex];
+    }
+}
+
+// 初始化並設定定時器
+function initQuotes() {
+    updateQuote(); // 初始顯示
+    setInterval(updateQuote, 5000); // 每5秒更新一次
+}
+
+// DOM 載入完成後初始化
+document.addEventListener('DOMContentLoaded', initQuotes);
 
 // 自定義 SweetAlert2 主題
 const swalCustomClass = {
@@ -74,8 +98,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 綁定離職小語按鈕
-    const prevButton = document.querySelector('.quote-prev');
-    const nextButton = document.querySelector('.quote-next');
+    const prevButton = document.querySelector('.quote-nav-prev');
+    const nextButton = document.querySelector('.quote-nav-next');
     if (prevButton) prevButton.addEventListener('click', () => updateQuote('prev'));
     if (nextButton) nextButton.addEventListener('click', () => updateQuote('next'));
 
@@ -93,6 +117,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 建立星星背景
     createStars();
+
+    updateUI();
 });
 
 // 遊戲狀態管理
@@ -205,6 +231,8 @@ class GameState {
             color: '#fff',
             confirmButtonColor: '#6D28D9'
         });
+
+        updateUI();
     }
 
     // 更新職稱
@@ -337,20 +365,44 @@ function updateQuote(direction = 'next') {
     if (!quoteElement) return;
 
     if (direction === 'next') {
-        currentQuoteIndex = (currentQuoteIndex + 1) % quotesList.length;
+        currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
     } else {
-        currentQuoteIndex = (currentQuoteIndex - 1 + quotesList.length) % quotesList.length;
+        currentQuoteIndex = (currentQuoteIndex - 1 + quotes.length) % quotes.length;
     }
     
     // 添加淡出效果
     quoteElement.style.opacity = '0';
     
     setTimeout(() => {
-        quoteElement.textContent = quotesList[currentQuoteIndex];
+        quoteElement.textContent = quotes[currentQuoteIndex];
         // 添加淡入效果
         quoteElement.style.opacity = '1';
     }, 300);
 }
+
+// 切換到上一句
+function previousQuote() {
+    console.log('切換到上一句'); // 調試日誌
+    currentQuoteIndex = (currentQuoteIndex - 1 + quotes.length) % quotes.length;
+    const quoteElement = document.querySelector('.quote-text');
+    if (quoteElement) {
+        quoteElement.textContent = quotes[currentQuoteIndex];
+    }
+}
+
+// 切換到下一句
+function nextQuote() {
+    console.log('切換到下一句'); // 調試日誌
+    currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
+    const quoteElement = document.querySelector('.quote-text');
+    if (quoteElement) {
+        quoteElement.textContent = quotes[currentQuoteIndex];
+    }
+}
+
+// 確保函數在全局範圍可用
+window.previousQuote = previousQuote;
+window.nextQuote = nextQuote;
 
 // 設置自動輪播
 let quoteInterval = setInterval(() => updateQuote('next'), 5000);
@@ -605,7 +657,7 @@ async function shareProgress() {
                 title: '分享卡片已生成',
                 showDenyButton: true,
                 showCancelButton: true,
-                confirmButtonText: '下載圖片',
+                confirmButtonText: '儲存圖片',
                 denyButtonText: '複製圖片',
                 cancelButtonText: '分享到 IG 限時動態',
                 background: 'rgba(13, 12, 19, 0.95)',
@@ -618,12 +670,66 @@ async function shareProgress() {
             });
 
             if (result.isConfirmed) {
-                const link = document.createElement('a');
-                link.href = imageUrl;
-                link.download = '離職進度.png';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                try {
+                    // 檢查是否為移動設備
+                    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                    
+                    if (isMobile) {
+                        // 移動設備：使用 Blob URL
+                        const blob = await fetch(imageUrl).then(r => r.blob());
+                        const blobUrl = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = blobUrl;
+                        a.download = '離職進度.png';
+                        a.style.display = 'none';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(blobUrl);
+                        
+                        // 顯示提示
+                        Swal.fire({
+                            title: '圖片已準備好',
+                            text: '請在彈出的選項中選擇「儲存圖片」',
+                            icon: 'success',
+                            background: 'rgba(13, 12, 19, 0.95)',
+                            color: '#fff',
+                            confirmButtonColor: '#6D28D9',
+                            customClass: swalCustomClass
+                        });
+                    } else {
+                        // 桌面設備：直接下載
+                        const a = document.createElement('a');
+                        a.href = imageUrl;
+                        a.download = '離職進度.png';
+                        a.style.display = 'none';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        
+                        // 顯示成功提示
+                        Swal.fire({
+                            title: '儲存成功',
+                            text: '圖片已儲存到你的下載資料夾',
+                            icon: 'success',
+                            background: 'rgba(13, 12, 19, 0.95)',
+                            color: '#fff',
+                            confirmButtonColor: '#6D28D9',
+                            customClass: swalCustomClass
+                        });
+                    }
+                } catch (error) {
+                    console.error('儲存圖片失敗:', error);
+                    Swal.fire({
+                        title: '儲存失敗',
+                        text: '請稍後再試',
+                        icon: 'error',
+                        background: 'rgba(13, 12, 19, 0.95)',
+                        color: '#fff',
+                        confirmButtonColor: '#6D28D9',
+                        customClass: swalCustomClass
+                    });
+                }
             } else if (result.isDenied) {
                 try {
                     const blob = await fetch(imageUrl).then(r => r.blob());
@@ -660,12 +766,62 @@ async function shareProgress() {
                         })
                     ];
                     
-                    if (navigator.share && navigator.canShare({ files: filesArray })) {
-                        await navigator.share({
-                            files: filesArray,
-                        });
+                    // 檢查是否為移動設備
+                    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                    
+                    if (isMobile) {
+                        // 嘗試直接開啟 Instagram Stories
+                        const instagramUrl = `instagram-stories://share`;
+                        window.location.href = instagramUrl;
+                        
+                        // 延遲一下再觸發檔案選擇
+                        setTimeout(async () => {
+                            if (navigator.share && navigator.canShare({ files: filesArray })) {
+                                try {
+                                    await navigator.share({
+                                        files: filesArray,
+                                    });
+                                } catch (error) {
+                                    // 如果分享失敗，提供備用方案
+                                    const blobUrl = URL.createObjectURL(imageBlob);
+                                    const a = document.createElement('a');
+                                    a.href = blobUrl;
+                                    a.download = 'resignation-progress.png';
+                                    a.click();
+                                    URL.revokeObjectURL(blobUrl);
+                                    
+                                    Swal.fire({
+                                        title: '請手動分享',
+                                        text: '圖片已儲存，請開啟 Instagram 並選擇此圖片發布限時動態',
+                                        icon: 'info',
+                                        background: 'rgba(13, 12, 19, 0.95)',
+                                        color: '#fff',
+                                        confirmButtonColor: '#6D28D9',
+                                        customClass: swalCustomClass
+                                    });
+                                }
+                            } else {
+                                // 不支援 Web Share API 的情況
+                                const blobUrl = URL.createObjectURL(imageBlob);
+                                const a = document.createElement('a');
+                                a.href = blobUrl;
+                                a.download = 'resignation-progress.png';
+                                a.click();
+                                URL.revokeObjectURL(blobUrl);
+                                
+                                Swal.fire({
+                                    title: '請手動分享',
+                                    text: '圖片已儲存，請開啟 Instagram 並選擇此圖片發布限時動態',
+                                    icon: 'info',
+                                    background: 'rgba(13, 12, 19, 0.95)',
+                                    color: '#fff',
+                                    confirmButtonColor: '#6D28D9',
+                                    customClass: swalCustomClass
+                                });
+                            }
+                        }, 500);
                     } else {
-                        // 備用方案：下載圖片
+                        // 桌面設備：提供儲存選項
                         const url = URL.createObjectURL(imageBlob);
                         const a = document.createElement('a');
                         a.href = url;
@@ -674,8 +830,8 @@ async function shareProgress() {
                         URL.revokeObjectURL(url);
                         
                         Swal.fire({
-                            title: '請手動分享',
-                            text: '圖片已下載，請手動分享到 Instagram 限時動態',
+                            title: '請使用手機分享',
+                            text: '圖片已儲存，請在手機上開啟 Instagram 並選擇此圖片發布限時動態',
                             icon: 'info',
                             background: 'rgba(13, 12, 19, 0.95)',
                             color: '#fff',
@@ -839,4 +995,145 @@ async function shareToInstagramStory() {
         console.error('分享到 Instagram 時發生錯誤:', error);
         alert('分享失敗，請稍後再試');
     }
-}   
+}
+
+// 定義稱號等級對應
+const TITLES = [
+    { level: 1, title: '職場新鮮人' },
+    { level: 5, title: '職場老鳥' },
+    { level: 10, title: '資深員工' },
+    { level: 15, title: '職場達人' },
+    { level: 20, title: '離職專家' },
+    { level: 25, title: '離職大師' },
+    { level: 30, title: '職場傳說' },
+    { level: 40, title: '離職之王' },
+    { level: 50, title: '自由靈魂' }
+];
+
+// 根據等級獲取稱號
+function getTitleByLevel(level) {
+    // 從高等級往低等級檢查，返回第一個符合的稱號
+    for (let i = TITLES.length - 1; i >= 0; i--) {
+        if (level >= TITLES[i].level) {
+            return TITLES[i].title;
+        }
+    }
+    return TITLES[0].title;
+}
+
+// 更新UI時更新稱號
+function updateUI() {
+    // 使用 class 選擇器
+    const titleDisplay = document.querySelector('.title-badge');
+    if (titleDisplay) {
+        const currentTitle = getTitleByLevel(game.data.level);
+        titleDisplay.textContent = currentTitle;
+        console.log('當前等級:', game.data.level, '更新稱號為:', currentTitle); // 調試日誌
+    } else {
+        console.log('找不到稱號顯示元素'); // 調試日誌
+    }
+    
+    // ... 其他 UI 更新代碼 ...
+}
+
+// 確保在遊戲載入和等級變化時都會更新稱號
+document.addEventListener('DOMContentLoaded', () => {
+    updateUI();
+});
+
+// 在等級提升時更新
+function levelUp() {
+    // ... 等級提升相關代碼 ...
+    updateUI();
+}
+
+// 重置遊戲數據
+async function resetGameData() {
+    try {
+        // 顯示確認對話框
+        const result = await Swal.fire({
+            title: '確定要重置所有進度？',
+            text: '此操作將清除所有數據，且無法復原',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: '是的，清除所有進度',
+            cancelButtonText: '取消',
+            background: 'rgba(13, 12, 19, 0.95)',
+            color: '#fff',
+            customClass: swalCustomClass
+        });
+
+        // 如果用戶確認要重置
+        if (result.isConfirmed) {
+            // 重置遊戲數據到初始狀態
+            game = {
+                data: {
+                    level: 1,
+                    exp: 0,
+                    expToNext: 1000, // 基礎經驗值
+                    stress: 0,
+                    stressMax: 100,
+                    happyCount: 0,
+                    angryCount: 0,
+                    lastStressReductionTime: null,
+                    lastDailyResetTime: null,
+                    dailyActions: {
+                        overtime: 0,
+                        meeting: 0,
+                        blame: 0,
+                        thunder: 0
+                    }
+                }
+            };
+
+            // 清除所有本地存儲
+            localStorage.clear();
+            
+            // 保存新的初始狀態
+            saveGameState();
+            
+            // 更新 UI
+            updateUI();
+
+            // 顯示成功提示
+            await Swal.fire({
+                title: '重置成功',
+                text: '所有進度已清除',
+                icon: 'success',
+                confirmButtonColor: '#6D28D9',
+                background: 'rgba(13, 12, 19, 0.95)',
+                color: '#fff',
+                customClass: swalCustomClass
+            });
+
+            // 重新載入頁面
+            window.location.reload();
+        }
+    } catch (error) {
+        console.error('重置遊戲數據時發生錯誤:', error);
+        // 顯示具體錯誤信息
+        Swal.fire({
+            title: '重置失敗',
+            text: '發生錯誤：' + error.message,
+            icon: 'error',
+            confirmButtonColor: '#6D28D9',
+            background: 'rgba(13, 12, 19, 0.95)',
+            color: '#fff',
+            customClass: swalCustomClass
+        });
+    }
+}
+
+// 保存遊戲狀態
+function saveGameState() {
+    try {
+        localStorage.setItem('gameState', JSON.stringify(game.data));
+    } catch (error) {
+        console.error('保存遊戲狀態時發生錯誤:', error);
+    }
+}
+
+// 確保函數在全局範圍可用
+window.resetGameData = resetGameData;   

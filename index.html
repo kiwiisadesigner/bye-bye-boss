@@ -102,14 +102,8 @@
                 <i class="fas fa-quote-left text-purple-400"></i>
                 離職小語
             </h2>
-            <div class="flex items-center gap-4">
-                <button class="quote-prev">
-                    <i class="fas fa-chevron-left text-2xl"></i>
-                </button>
-                <div class="quote-text flex-1 text-center text-xl font-medium py-4"></div>
-                <button class="quote-next">
-                    <i class="fas fa-chevron-right text-2xl"></i>
-                </button>
+            <div class="quote-container">
+                <div class="quote-text"></div>
             </div>
         </div>
 
@@ -195,7 +189,12 @@
                 分享進度
             </button>
         </div>
-
+        
+        <!-- 重置按鈕 -->
+        <button class="reset-btn" onclick="resetGameData()">
+            重置所有進度
+        </button>
+        
     </div>
 
     <script src="index.js"></script>
