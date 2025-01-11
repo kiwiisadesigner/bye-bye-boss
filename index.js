@@ -507,6 +507,96 @@ async function shareProgress() {
         // 關閉載入提示
         Swal.close();
         
+        // 創建按鈕容器
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'share-buttons';
+        buttonContainer.innerHTML = `
+            <button class="share-btn copy-btn" onclick="copyImage()">
+                複製圖片
+            </button>
+            <button class="share-btn download-btn" onclick="downloadImage()">
+                下載圖片
+            </button>
+            <button class="share-btn instagram-story-btn" onclick="shareToInstagramStory()">
+                分享到 IG 限時動態
+            </button>
+        `;
+
+        // 更新按鈕樣式
+        const style = document.createElement('style');
+        style.textContent = `
+            .share-buttons {
+                display: flex;
+                gap: 12px;
+                margin-top: 20px;
+                justify-content: center;
+            }
+            
+            .share-btn {
+                padding: 12px 24px;
+                border-radius: 8px;
+                border: none;
+                cursor: pointer;
+                font-weight: bold;
+                transition: all 0.2s;
+            }
+            
+            .share-btn:hover {
+                transform: translateY(-2px);
+                opacity: 0.9;
+            }
+            
+            .instagram-story-btn {
+                background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+                color: white;
+            }
+            
+            .download-btn {
+                background: #6D28D9;
+                color: white;
+            }
+            
+            .copy-btn {
+                background: #4F46E5;
+                color: white;
+            }
+        `;
+
+        document.head.appendChild(style);
+        document.body.appendChild(buttonContainer);
+
+        // Instagram 限時動態分享功能
+        window.shareToInstagramStory = async function() {
+            try {
+                const imageBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                const filesArray = [
+                    new File([imageBlob], 'resignation-progress.png', {
+                        type: 'image/png'
+                    })
+                ];
+                
+                if (navigator.share && navigator.canShare({ files: filesArray })) {
+                    await navigator.share({
+                        files: filesArray,
+                    });
+                    document.body.removeChild(buttonContainer);
+                    document.head.removeChild(style);
+                } else {
+                    // 備用方案：下載圖片
+                    const url = URL.createObjectURL(imageBlob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'resignation-progress.png';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    alert('請將圖片儲存後，手動分享到 Instagram 限時動態');
+                }
+            } catch (error) {
+                console.error('分享到 Instagram 時發生錯誤:', error);
+                alert('分享失敗，請稍後再試');
+            }
+        };
+
         setTimeout(async () => {
             const result = await Swal.fire({
                 imageUrl,
@@ -517,10 +607,12 @@ async function shareProgress() {
                 showCancelButton: true,
                 confirmButtonText: '下載圖片',
                 denyButtonText: '複製圖片',
-                cancelButtonText: '取消',
+                cancelButtonText: '分享到 IG 限時動態',
                 background: 'rgba(13, 12, 19, 0.95)',
                 color: '#fff',
                 confirmButtonColor: '#6D28D9',
+                denyButtonColor: '#4F46E5',
+                cancelButtonColor: '#E1306C',
                 customClass: swalCustomClass,
                 allowOutsideClick: false
             });
@@ -558,20 +650,57 @@ async function shareProgress() {
                         customClass: swalCustomClass
                     });
                 }
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                // 處理 Instagram 限時動態分享
+                try {
+                    const imageBlob = await fetch(imageUrl).then(r => r.blob());
+                    const filesArray = [
+                        new File([imageBlob], 'resignation-progress.png', {
+                            type: 'image/png'
+                        })
+                    ];
+                    
+                    if (navigator.share && navigator.canShare({ files: filesArray })) {
+                        await navigator.share({
+                            files: filesArray,
+                        });
+                    } else {
+                        // 備用方案：下載圖片
+                        const url = URL.createObjectURL(imageBlob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'resignation-progress.png';
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        
+                        Swal.fire({
+                            title: '請手動分享',
+                            text: '圖片已下載，請手動分享到 Instagram 限時動態',
+                            icon: 'info',
+                            background: 'rgba(13, 12, 19, 0.95)',
+                            color: '#fff',
+                            confirmButtonColor: '#6D28D9',
+                            customClass: swalCustomClass
+                        });
+                    }
+                } catch (error) {
+                    console.error('分享到 Instagram 時發生錯誤:', error);
+                    Swal.fire({
+                        title: '分享失敗',
+                        text: '請稍後再試',
+                        icon: 'error',
+                        background: 'rgba(13, 12, 19, 0.95)',
+                        color: '#fff',
+                        confirmButtonColor: '#6D28D9',
+                        customClass: swalCustomClass
+                    });
+                }
             }
         }, 100);
 
     } catch (error) {
-        console.error('分享功能發生錯誤:', error);
-        Swal.fire({
-            title: '分享功能發生錯誤',
-            text: '請稍後再試',
-            icon: 'error',
-            background: 'rgba(13, 12, 19, 0.95)',
-            color: '#fff',
-            confirmButtonColor: '#6D28D9',
-            customClass: swalCustomClass
-        });
+        console.error('生成分享圖片時發生錯誤:', error);
+        alert('生成分享圖片失敗，請稍後再試');
     }
 }
 
@@ -710,4 +839,4 @@ async function shareToInstagramStory() {
         console.error('分享到 Instagram 時發生錯誤:', error);
         alert('分享失敗，請稍後再試');
     }
-}
+}   
