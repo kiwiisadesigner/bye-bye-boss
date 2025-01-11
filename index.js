@@ -662,3 +662,52 @@ function showLevelUpEffect() {
         container.remove();
     }, 2000);
 }
+
+// 添加 Instagram Story 分享功能
+async function shareToInstagramStory() {
+    try {
+        const canvas = await generateShareImage(); // 使用現有的圖片生成功能
+        const imageBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        
+        // 檢查是否支援 Web Share API 和 Instagram 分享
+        if (navigator.share && navigator.canShare) {
+            const filesArray = [
+                new File([imageBlob], 'resignation-progress.png', {
+                    type: 'image/png'
+                })
+            ];
+            
+            const shareData = {
+                files: filesArray,
+            };
+            
+            // 檢查是否可以分享文件
+            if (navigator.canShare(shareData)) {
+                await navigator.share(shareData);
+            } else {
+                // 如果不支援直接分享，提供下載選項
+                const url = URL.createObjectURL(imageBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'resignation-progress.png';
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                alert('請將圖片儲存後，手動分享到 Instagram 限時動態');
+            }
+        } else {
+            // 不支援 Web Share API 時的備用方案
+            const url = URL.createObjectURL(imageBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'resignation-progress.png';
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            alert('請將圖片儲存後，手動分享到 Instagram 限時動態');
+        }
+    } catch (error) {
+        console.error('分享到 Instagram 時發生錯誤:', error);
+        alert('分享失敗，請稍後再試');
+    }
+}
