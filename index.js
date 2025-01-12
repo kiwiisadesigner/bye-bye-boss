@@ -128,6 +128,8 @@ class GameState {
         this.validateState();
         this.domElements = this.cacheDOMElements();
         this.updateUI();
+        this.achievements = this.loadAchievements();
+        this.checkAchievements();
     }
 
     // 初始狀態
@@ -204,6 +206,7 @@ class GameState {
         this.updateUI();
         this.saveGameState();
         this.showFloatingNumber(actionConfig.stress, actionConfig.exp);
+        this.checkAchievements();
     }
 
     // 增加經驗值
@@ -357,6 +360,50 @@ class GameState {
             container.remove();
         }, 2000);
     }
+
+    loadAchievements() {
+        return JSON.parse(localStorage.getItem('resignGameAchievements')) || {
+            unlocked: [],
+            lastCheck: null
+        };
+    }
+
+    saveAchievements() {
+        localStorage.setItem('resignGameAchievements', JSON.stringify(this.achievements));
+    }
+
+    checkAchievements() {
+        Object.values(ACHIEVEMENTS).forEach(achievement => {
+            if (!this.achievements.unlocked.includes(achievement.id) &&
+                achievement.condition(this.data)) {
+                this.unlockAchievement(achievement);
+            }
+        });
+    }
+
+    unlockAchievement(achievement) {
+        this.achievements.unlocked.push(achievement.id);
+        this.saveAchievements();
+        
+        // 添加經驗值獎勵
+        this.addExperience(achievement.reward);
+        
+        // 顯示成就解鎖通知
+        Swal.fire({
+            title: '🏆 成就解鎖！',
+            html: `
+                <div class="achievement-unlock">
+                    <div class="achievement-icon">${achievement.icon}</div>
+                    <div class="achievement-name">${achievement.name}</div>
+                    <div class="achievement-desc">${achievement.description}</div>
+                    <div class="achievement-reward">獎勵: ${achievement.reward} 經驗值</div>
+                </div>
+            `,
+            background: 'rgba(13, 12, 19, 0.95)',
+            color: '#fff',
+            confirmButtonColor: '#6D28D9'
+        });
+    }
 }
 
 // 更新離職小語
@@ -430,13 +477,21 @@ function drawProgressBar(ctx, x, y, width, height, progress, color1, color2) {
 async function generateShareCard(nickname) {
     console.log('開始生成分享卡片');
     
+    // 創建一個較大的 canvas 以獲得更好的渲染質量
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    canvas.width = 1080;
-    canvas.height = 1920;
-
-    // 確保字體已載入
-    await document.fonts.load('bold 96px "Noto Sans TC"');
+    
+    // 設定基礎尺寸
+    const baseWidth = 1080;
+    const baseHeight = 1920;
+    
+    // 設定實際渲染尺寸（2倍於基礎尺寸以確保清晰度）
+    canvas.width = baseWidth;
+    canvas.height = baseHeight;
+    
+    // 設定顯示尺寸
+    canvas.style.width = `${baseWidth / 2}px`;
+    canvas.style.height = `${baseHeight / 2}px`;
 
     // 設置背景
     const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
@@ -445,86 +500,100 @@ async function generateShareCard(nickname) {
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 添加標題
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 96px "Noto Sans TC"';
+    // 添加主要卡片背景
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+    roundRect(ctx, 40, 40, canvas.width - 80, canvas.height - 80, 30);
+
+    // 設定文字渲染
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('我的離職進度', canvas.width/2, 200);
+
+    // 添加標題
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 84px "Noto Sans TC"';
+    ctx.fillText('我的離職進度', canvas.width/2, 160);
 
     // 添加暱稱
-    ctx.font = '56px "Noto Sans TC"';
+    ctx.font = '42px "Noto Sans TC"';
     ctx.fillStyle = '#a78bfa';
-    ctx.fillText(`${nickname} 的離職日記`, canvas.width/2, 300);
+    ctx.fillText(`${nickname} 的離職日記`, canvas.width/2, 240);
 
     // 添加等級
-    ctx.font = 'bold 200px "Noto Sans TC"';
-    ctx.fillStyle = '#a855f7';
-    ctx.fillText(`Lv.${game.data.level}`, canvas.width/2, 500);
+    const levelGradient = ctx.createLinearGradient(
+        canvas.width/2 - 150, 400,
+        canvas.width/2 + 150, 400
+    );
+    levelGradient.addColorStop(0, '#a855f7');
+    levelGradient.addColorStop(1, '#DB2777');
+    ctx.fillStyle = levelGradient;
+    ctx.font = 'bold 160px "Noto Sans TC"';
+    ctx.fillText(`Lv.${game.data.level}`, canvas.width/2, 400);
 
     // 繪製經驗值進度條
-    const expBarWidth = 900;
-    const expBarHeight = 48;
+    const expBarWidth = canvas.width * 0.8;
+    const expBarHeight = 12;
+    const expBarY = 500;
+    
+    // 進度條背景
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+    roundRect(ctx, (canvas.width - expBarWidth)/2, expBarY, expBarWidth, expBarHeight, 6);
+    
+    // 實際進度
     const expProgress = game.data.exp / game.data.expToNext;
-    drawProgressBar(
-        ctx,
-        (canvas.width - expBarWidth) / 2,
-        600,
-        expBarWidth,
-        expBarHeight,
-        expProgress,
-        '#6D28D9',
-        '#DB2777'
-    );
+    ctx.fillStyle = '#a855f7';
+    roundRect(ctx, (canvas.width - expBarWidth)/2, expBarY, expBarWidth * expProgress, expBarHeight, 6);
 
     // 添加經驗值文字
-    ctx.font = '64px "Noto Sans TC"';
+    ctx.font = '48px "Noto Sans TC"';
     ctx.fillStyle = '#ffffff';
-    ctx.fillText(`${game.data.exp} / ${game.data.expToNext}`, canvas.width/2, 680);
+    ctx.fillText(`${game.data.exp} / ${game.data.expToNext}`, canvas.width/2, expBarY + 60);
 
-    // 添加今日心情
+    // 添加今日心情區塊
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+    roundRect(ctx, 80, 650, canvas.width - 160, 280, 20);
+    
+    // 今日心情標題
     ctx.font = 'bold 72px "Noto Sans TC"';
-    ctx.fillText('今日心情', canvas.width/2, 850);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('今日心情', canvas.width/2, 740);
     
     // 添加表情符號和數字
-    ctx.font = '72px "Noto Sans TC"';
+    ctx.font = '64px "Noto Sans TC"';
+    // 分隔線
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(canvas.width/2, 800);
+    ctx.lineTo(canvas.width/2, 860);
+    ctx.stroke();
+    
     ctx.fillStyle = '#22c55e';
-    ctx.fillText(`😊 ${game.data.happyCount}`, canvas.width/2 - 150, 950);
+    ctx.fillText(`😊 ${game.data.happyCount}`, canvas.width/2 - 150, 830);
     ctx.fillStyle = '#ef4444';
-    ctx.fillText(`😠 ${game.data.angryCount}`, canvas.width/2 + 150, 950);
+    ctx.fillText(`😠 ${game.data.angryCount}`, canvas.width/2 + 150, 830);
 
-    // 添加壓力指數標題
+    // 添加壓力指數區塊
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+    roundRect(ctx, 80, 980, canvas.width - 160, 280, 20);
+    
+    // 壓力指數標題
     ctx.font = 'bold 72px "Noto Sans TC"';
     ctx.fillStyle = '#ffffff';
-    ctx.fillText('壓力指數', canvas.width/2, 1100);
+    ctx.fillText('壓力指數', canvas.width/2, 1070);
 
-    // 繪製壓力值進度條
-    const stressBarWidth = 900;
-    const stressBarHeight = 48;
-    const stressProgress = game.data.stress / GAME_CONFIG.MAX_STRESS;
-    drawProgressBar(
-        ctx,
-        (canvas.width - stressBarWidth) / 2,
-        1200,
-        stressBarWidth,
-        stressBarHeight,
-        stressProgress,
-        '#ef4444',
-        '#dc2626'
-    );
-
-    // 添加壓力值百分比
-    ctx.font = 'bold 72px "Noto Sans TC"';
+    // 壓力值百分比
     const stressPercentage = ((game.data.stress / GAME_CONFIG.MAX_STRESS) * 100).toFixed(1);
-    ctx.fillText(`${stressPercentage}%`, canvas.width/2, 1280);
+    ctx.font = 'bold 84px "Noto Sans TC"';
+    ctx.fillStyle = '#ef4444';
+    ctx.fillText(`${stressPercentage}%`, canvas.width/2, 1160);
 
     // 添加 QR Code
     const qrSize = 200;
-    const qrCodeData = await generateQRCode('byebyeboss.com');
+    const qrCodeData = await generateQRCode('byebyeboss.xyz');
     ctx.drawImage(
         qrCodeData,
         (canvas.width - qrSize) / 2,
-        1350,
+        1320,
         qrSize,
         qrSize
     );
@@ -534,7 +603,7 @@ async function generateShareCard(nickname) {
     ctx.fillStyle = '#a78bfa';
     ctx.fillText('掃描 QR Code 開始你的離職之旅', canvas.width/2, 1600);
 
-    return canvas.toDataURL('image/png');
+    return canvas.toDataURL('image/png', 1.0); // 使用最高品質輸出
 }
 
 // 生成 QR Code 的輔助函數
@@ -1042,3 +1111,121 @@ window.simpleReset = function() {
         window.location.reload();
     }
 };   
+
+// 修改顯示預覽的部分
+async function showSharePreview(imageData) {
+    const previewContainer = document.createElement('div');
+    previewContainer.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        max-width: 90vw;
+        max-height: 90vh;
+        width: auto;
+        height: auto;
+        z-index: 1000;
+    `;
+
+    const img = new Image();
+    img.src = imageData;
+    img.style.cssText = `
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: 90vh;
+        object-fit: contain;
+    `;
+
+    previewContainer.appendChild(img);
+    document.body.appendChild(previewContainer);
+}   
+
+// 成就系統配置
+const ACHIEVEMENTS = {
+    OVERTIME_MASTER: {
+        id: 'overtime_master',
+        name: '加班之王',
+        description: '累積加班超過100次',
+        condition: (state) => state.actionCounts?.overtime >= 100,
+        reward: 1000,
+        icon: '⏰'
+    },
+    STRESS_SURVIVOR: {
+        id: 'stress_survivor',
+        name: '抗壓之王',
+        description: '壓力值達到100%後恢復到0%',
+        condition: (state) => state.stressHistory?.includes(100) && state.stress === 0,
+        reward: 2000,
+        icon: '💪'
+    },
+    HAPPY_WORKER: {
+        id: 'happy_worker',
+        name: '開心職人',
+        description: '累積50次開心心情',
+        condition: (state) => state.happyCount >= 50,
+        reward: 800,
+        icon: '😊'
+    },
+    ANGRY_MASTER: {
+        id: 'angry_master',
+        name: '忍者之道',
+        description: '累積100次生氣但仍在職',
+        condition: (state) => state.angryCount >= 100,
+        reward: 1500,
+        icon: '😤'
+    },
+    STREAK_WARRIOR: {
+        id: 'streak_warrior',
+        name: '堅持不懈',
+        description: '連續登入7天',
+        condition: (state) => state.playStreak >= 7,
+        reward: 1000,
+        icon: '📅'
+    }
+};
+
+// 添加查看成就列表的功能
+function showAchievements() {
+    if (!game) return;
+    
+    const achievementsList = Object.values(ACHIEVEMENTS).map(achievement => {
+        const isUnlocked = game.achievements.unlocked.includes(achievement.id);
+        return `
+            <div class="achievement-item ${isUnlocked ? 'unlocked' : 'locked'}">
+                <div class="achievement-icon">${achievement.icon}</div>
+                <div class="achievement-info">
+                    <div class="achievement-name">${achievement.name}</div>
+                    <div class="achievement-desc">${achievement.description}</div>
+                </div>
+                <div class="achievement-status">
+                    ${isUnlocked ? '✅' : '🔒'}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    Swal.fire({
+        title: '成就列表',
+        html: `
+            <div class="achievements-container">
+                ${achievementsList}
+            </div>
+        `,
+        background: 'rgba(13, 12, 19, 0.95)',
+        color: '#fff',
+        confirmButtonColor: '#6D28D9',
+        width: '80%'
+    });
+}
+
+// 添加成就按鈕到界面
+document.addEventListener('DOMContentLoaded', () => {
+    const achievementsButton = document.createElement('button');
+    achievementsButton.className = 'achievements-button';
+    achievementsButton.innerHTML = '<i class="fas fa-trophy"></i> 查看成就';
+    achievementsButton.onclick = showAchievements;
+    
+    // 將按鈕添加到合適的位置
+    document.querySelector('.container').appendChild(achievementsButton);
+});   
