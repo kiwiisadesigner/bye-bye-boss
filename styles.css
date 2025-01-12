@@ -1,0 +1,780 @@
+/* 基礎樣式 */
+:root {
+    --primary-color: #6D28D9;
+    --secondary-color: #DB2777;
+    --background-dark: #1a1c4b;
+    --text-light: #f3f4f6;
+}
+
+body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: linear-gradient(125deg, #1a1c4b 0%, #372f6a 50%, #1a1c4b 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    color: var(--text-light);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* 添加星星背景動畫 */
+.stars {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle var(--duration) infinite;
+    opacity: 0;
+}
+
+@keyframes twinkle {
+    0%, 100% { opacity: 0; }
+    50% { opacity: var(--opacity); }
+}
+
+/* 卡片懸浮效果 */
+.gradient-border-card {
+    position: relative;
+    background: rgba(13, 12, 19, 0.7);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    backdrop-filter: blur(12px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.gradient-border-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(109, 40, 217, 0.2);
+}
+
+/* 按鈕動畫效果 */
+.action-button {
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+.action-button::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: rotate(45deg);
+    transition: 0.5s;
+    opacity: 0;
+}
+
+.action-button:hover::after {
+    opacity: 1;
+    transform: rotate(45deg) translate(50%, 50%);
+}
+
+.action-button:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(109, 40, 217, 0.3);
+}
+
+/* 進度條動畫 */
+.modern-progress-bar {
+    position: relative;
+    overflow: hidden;
+}
+
+.modern-progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255,255,255,0.2), 
+        transparent);
+    animation: progressShine 2s infinite;
+}
+
+@keyframes progressShine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* 等級標籤效果 */
+.level-badge {
+    background: linear-gradient(45deg, #6D28D9, #DB2777);
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 12px rgba(109, 40, 217, 0.3);
+    animation: pulseLevel 2s infinite;
+}
+
+@keyframes pulseLevel {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* 心情圖示動畫 */
+.mood-icon {
+    transition: transform 0.3s ease;
+}
+
+.mood-icon:hover {
+    transform: scale(1.2) rotate(15deg);
+}
+
+/* 浮動數字效果 */
+.floating-number {
+    animation: floatUp 1s ease-out forwards;
+    opacity: 0;
+}
+
+@keyframes floatUp {
+    0% {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+}
+
+/* 分享按鈕特效 */
+.share-button {
+    background: linear-gradient(45deg, #6D28D9, #DB2777);
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 999px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(109, 40, 217, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.share-button::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+    transform: rotate(45deg);
+    transition: 0.5s;
+    opacity: 0;
+}
+
+.share-button:hover::before {
+    opacity: 1;
+    transform: rotate(45deg) translate(50%, 50%);
+}
+
+.share-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(109, 40, 217, 0.4);
+}
+
+/* 卡片基礎樣式 */
+.gradient-border-card {
+    position: relative;
+    background: rgba(13, 12, 19, 0.7);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    backdrop-filter: blur(12px);
+}
+
+.gradient-border-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 1rem;
+    padding: 2px;
+    background: linear-gradient(45deg, #6D28D9, #DB2777, #6D28D9);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+}
+
+/* 按鈕基礎樣式 */
+.gradient-border-button {
+    position: relative;
+    background: rgba(13, 12, 19, 0.7);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    backdrop-filter: blur(12px);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    cursor: pointer;
+    border: none;
+    color: #fff;
+}
+
+.gradient-border-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 0.75rem;
+    padding: 2px;
+    background: linear-gradient(45deg, #6D28D9, #DB2777, #6D28D9);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+}
+
+/* 標題徽章 */
+.title-badge {
+    background: rgba(109, 40, 217, 0.2);
+    border: 1px solid rgba(109, 40, 217, 0.3);
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 0.875rem;
+    color: #A78BFA;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* 動畫效果 */
+@keyframes borderRotate {
+    from { background-position: 0% center; }
+    to { background-position: 200% center; }
+}
+
+.gradient-border-card::before,
+.gradient-border-button::before {
+    background-size: 200% auto;
+    animation: borderRotate 4s linear infinite;
+}
+
+/* 懸浮效果 */
+.gradient-border-button:hover {
+    transform: translateY(-2px);
+}
+
+.gradient-border-button:hover::before {
+    background: linear-gradient(45deg, #8B5CF6, #EC4899, #8B5CF6);
+}
+
+/* SweetAlert2 客製化樣式 */
+.swal2-popup.swal2-modal {
+    background: rgba(13, 12, 19, 0.95);
+    backdrop-filter: blur(12px);
+}
+
+.swal2-title, .swal2-html-container {
+    color: #fff !important;
+}
+
+.swal2-input {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(109, 40, 217, 0.3) !important;
+    color: #fff !important;
+}
+
+/* 分享預覽容器 */
+.share-preview-container {
+    max-width: 300px;
+    margin: 0 auto;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.share-preview-image {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* 主容器 */
+.container {
+    min-height: 100vh;
+    padding: 2vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 上方狀態卡片區域 */
+.status-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2vw;
+    height: 20vh;  /* 減少高度 */
+}
+
+/* 離職小語區域 */
+.quote-section {
+    background: var(--card-bg);
+    border-radius: 1rem;
+    padding: 1.5vh;
+    height: 10vh;  /* 減少高度 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+/* 按鈕網格 */
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(2, minmax(100px, 12vh));
+    gap: 0.4vh 2vw;
+    margin-top: auto;
+    width: 100%;
+    padding: 0;
+}
+
+/* 按鈕基本樣式 */
+.action-button {
+    width: 100%;
+    height: 100%;
+    background: rgba(13, 12, 19, 0.7);
+    border-radius: 1rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8vh;
+    padding: 1.5vh;
+}
+
+/* 按鈕發光邊框 */
+.action-button::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    background: linear-gradient(45deg, #bc1888, #8B5CF6);
+    border-radius: inherit;
+    padding: 1px;
+    -webkit-mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
+/* 按鈕內容樣式 */
+.action-icon {
+    font-size: 2.2vh;
+    margin-bottom: 0.5vh;
+    z-index: 1;
+}
+
+.action-text {
+    font-size: 1.8vh;
+    text-align: center;
+    z-index: 1;
+}
+
+.stress-value {
+    font-size: 1.6vh;
+    z-index: 1;
+}
+
+/* 分享按鈕 */
+.share-button {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: linear-gradient(45deg, #bc1888, #8B5CF6);
+    color: white;
+    border: none;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1vh;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .action-grid {
+        gap: 0.75rem;
+        padding: 0 0.75rem;
+    }
+
+    .action-button {
+        padding: 1.25rem;
+    }
+
+    .action-icon {
+        font-size: 1.25rem;
+    }
+
+    .action-text {
+        font-size: 0.75rem;
+    }
+
+    .stress-value {
+        font-size: 0.675rem;
+    }
+
+    .share-button {
+        bottom: 1rem;
+        right: 1rem;
+        padding: 0.5rem 1rem;
+    }
+}
+
+/* 進度條基礎樣式 */
+.modern-progress {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    overflow: hidden;
+    position: relative;
+    margin: 1vh 0;
+}
+
+.modern-progress-bar {
+    width: 0%;
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.3s ease;
+    position: relative;
+}
+
+/* 經驗值進度條漸層 */
+#expBar {
+    background: linear-gradient(90deg, #6D28D9, #DB2777);
+}
+
+/* 壓力值進度條漸層 */
+.stress-gradient {
+    background: linear-gradient(90deg, #6D28D9, #DB2777);
+}
+
+/* 高壓力時的顏色 */
+.stress-high {
+    background: linear-gradient(90deg, #ef4444, #dc2626) !important;
+}
+
+/* 中等壓力時的顏色 */
+.stress-medium {
+    background: linear-gradient(90deg, #f59e0b, #d97706) !important;
+}
+
+/* 進度條發光效果 */
+.modern-progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.2), 
+        transparent);
+    animation: shine 2s infinite;
+}
+
+@keyframes shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* 按鈕容器樣式 */
+.action-button-wrapper {
+    position: relative;
+    padding: 2px; /* 增加邊框粗細 */
+    border-radius: 16px;
+    background: linear-gradient(
+        45deg,
+        rgba(109, 40, 217, 0.8),  /* 增加透明度 */
+        rgba(219, 39, 119, 0.8)   /* 增加透明度 */
+    );
+    transition: all 0.3s ease;
+}
+
+.action-button-wrapper:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(
+        45deg,
+        rgba(109, 40, 217, 1),    /* 懸浮時更亮 */
+        rgba(219, 39, 119, 1)     /* 懸浮時更亮 */
+    );
+    padding: 2.5px; /* 懸浮時邊框略微增加 */
+}
+
+/* 按鈕本身的樣式 */
+.action-button {
+    width: 100%;
+    padding: 20px;
+    background: rgba(13, 12, 19, 0.95);
+    border-radius: 14px; /* 調整為略小於外層容器 */
+    border: none;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 按鈕內容樣式 */
+.action-icon {
+    font-size: 24px;
+    margin-bottom: 4px;
+}
+
+.action-title {
+    font-weight: 500;
+    font-size: 16px;
+    color: #fff;
+}
+
+.stress-value {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+/* 壓力值顏色 */
+.action-button.stress .stress-value {
+    color: #ef4444; /* 紅色 */
+}
+
+.action-button.relief .stress-value {
+    color: #22c55e; /* 綠色 */
+}
+
+/* 點擊效果 */
+.action-button:active {
+    transform: scale(0.98);
+}
+
+/* 發光效果 */
+.action-button-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 16px;
+    background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.action-button-wrapper:hover::after {
+    opacity: 1;
+}
+
+/* 頂部狀態列 */
+.grid.grid-cols-1.md\:grid-cols-3 {
+    gap: 1.5vh;
+    margin-bottom: 1.5vh;
+}
+
+/* 狀態卡片 */
+.gradient-border-card {
+    padding: 1.5vh;
+}
+
+/* 離職小語區塊 */
+.gradient-border-card.p-8.mb-8 {
+    padding: 1.5vh;
+    margin-bottom: 1.5vh;
+}
+
+/* 按鈕群組 */
+.grid.grid-cols-4 {
+    gap: 1.5vh;
+    margin-bottom: 1.5vh;
+}
+
+/* 按鈕樣式調整 */
+.action-button {
+    padding: 1.5vh;
+}
+
+/* 分享按鈕容器 */
+.text-center.mt-8 {
+    margin-top: 1.5vh;
+}
+
+/* 調整文字大小 */
+.text-xl {
+    font-size: 1.1rem;
+}
+
+.text-4xl {
+    font-size: 1.8rem;
+}
+
+.text-5xl {
+    font-size: 2rem;
+}
+
+.exp-bar, .stress-bar {
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+}
+
+.reset-btn {
+    background: rgba(220, 38, 38, 0.3);
+    color: rgba(255, 255, 255, 0.4);
+    border: none;
+    padding: 1px 4px;
+    border-radius: 2px;
+    cursor: pointer;
+    font-weight: 300;
+    transition: all 0.2s;
+    font-size: 0.75em;
+    opacity: 0.3;
+    letter-spacing: -0.5px;
+    transform: scale(0.8);
+    text-transform: none;
+    box-shadow: none;
+    white-space: nowrap;
+    width: min-content;
+    min-width: min-content;
+    max-width: max-content;
+    line-height: 1;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.reset-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min-content;
+    height: 20px;
+    background: inherit;
+    border-radius: inherit;
+    z-index: -1;
+}
+
+.reset-btn:hover {
+    background: rgba(220, 38, 38, 0.5);
+    transform: scale(0.8);
+    opacity: 0.5;
+}
+
+.reset-btn:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+    margin: 20px 0;
+}
+
+/* 分享進度按鈕 - 更醒目 */
+.share-progress-btn {
+    background: linear-gradient(45deg, #6D28D9, #7c3aed);
+    color: white;
+    border: none;
+    padding: 14px 32px;  /* 加大padding */
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.1em;    /* 加大字體 */
+    transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(109, 40, 217, 0.3);  /* 添加陰影 */
+}
+
+.share-progress-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(109, 40, 217, 0.4);
+    background: linear-gradient(45deg, #7c3aed, #8b5cf6);
+}
+
+/* 重置按鈕 - 較不醒目 */
+.reset-btn {
+    background: rgba(220, 38, 38, 0.9);  /* 降低透明度 */
+    color: white;
+    border: none;
+    padding: 6px 12px;   /* 縮小padding */
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: normal; /* 改為普通字重 */
+    transition: all 0.2s;
+    font-size: 0.85em;   /* 縮小字體 */
+    opacity: 0.85;       /* 降低整體透明度 */
+}
+
+.reset-btn:hover {
+    background: #ef4444;
+    transform: translateY(-1px);  /* 縮小位移效果 */
+    opacity: 1;
+}
+
+.quote-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 80px;        /* 增加容器高度 */
+    padding: 1.5rem;
+}
+
+.quote-text {
+    text-align: center;
+    width: 100%;
+    font-size: 1.25rem;      /* 更大的字體 */
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    font-weight: 500;        /* 稍微加粗 */
+    letter-spacing: 0.5px;   /* 增加字距 */
+}
