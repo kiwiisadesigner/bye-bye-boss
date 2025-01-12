@@ -430,11 +430,13 @@ function drawProgressBar(ctx, x, y, width, height, progress, color1, color2) {
 async function generateShareCard(nickname) {
     console.log('開始生成分享卡片');
     
-    // 創建 canvas，使用 Instagram Stories 的標準尺寸
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    canvas.width = 1080;   // IG Stories 標準寬度
-    canvas.height = 1920;  // IG Stories 標準高度
+    canvas.width = 1080;
+    canvas.height = 1920;
+
+    // 確保字體已載入
+    await document.fonts.load('bold 96px "Noto Sans TC"');
 
     // 設置背景
     const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
@@ -443,111 +445,131 @@ async function generateShareCard(nickname) {
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 調整所有元素的位置和大小以適應新尺寸
-    ctx.textAlign = 'center';
-
     // 添加標題
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 72px sans-serif';
+    ctx.font = 'bold 96px "Noto Sans TC"';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     ctx.fillText('我的離職進度', canvas.width/2, 200);
 
     // 添加暱稱
-    ctx.font = '40px sans-serif';
+    ctx.font = '56px "Noto Sans TC"';
     ctx.fillStyle = '#a78bfa';
-    ctx.fillText(`${nickname} 的離職日記`, canvas.width/2, 280);
+    ctx.fillText(`${nickname} 的離職日記`, canvas.width/2, 300);
 
     // 添加等級
-    ctx.font = 'bold 144px sans-serif';
+    ctx.font = 'bold 200px "Noto Sans TC"';
     ctx.fillStyle = '#a855f7';
-    ctx.fillText(`Lv.${game.data.level}`, canvas.width/2, 600);
+    ctx.fillText(`Lv.${game.data.level}`, canvas.width/2, 500);
 
-    // 添加經驗值進度條
+    // 繪製經驗值進度條
+    const expBarWidth = 900;
+    const expBarHeight = 48;
     const expProgress = game.data.exp / game.data.expToNext;
     drawProgressBar(
         ctx,
-        240, // x
-        630, // y
-        600, // width
-        20,  // height
+        (canvas.width - expBarWidth) / 2,
+        600,
+        expBarWidth,
+        expBarHeight,
         expProgress,
-        '#a855f7', // 漸層色1
-        '#d8b4fe'  // 漸層色2
+        '#6D28D9',
+        '#DB2777'
     );
-    
+
     // 添加經驗值文字
-    ctx.font = '48px sans-serif';
+    ctx.font = '64px "Noto Sans TC"';
     ctx.fillStyle = '#ffffff';
-    ctx.fillText(`${game.data.exp} / ${game.data.expToNext}`, canvas.width/2, 700);
+    ctx.fillText(`${game.data.exp} / ${game.data.expToNext}`, canvas.width/2, 680);
 
     // 添加今日心情
-    ctx.font = 'bold 64px sans-serif';
-    ctx.fillText('今日心情', canvas.width/2, 900);
+    ctx.font = 'bold 72px "Noto Sans TC"';
+    ctx.fillText('今日心情', canvas.width/2, 850);
     
     // 添加表情符號和數字
-    ctx.font = '56px sans-serif';
+    ctx.font = '72px "Noto Sans TC"';
     ctx.fillStyle = '#22c55e';
-    ctx.fillText(`😊 ${game.data.happyCount}`, canvas.width/2 - 120, 1000);
+    ctx.fillText(`😊 ${game.data.happyCount}`, canvas.width/2 - 150, 950);
     ctx.fillStyle = '#ef4444';
-    ctx.fillText(`😠 ${game.data.angryCount}`, canvas.width/2 + 120, 1000);
+    ctx.fillText(`😠 ${game.data.angryCount}`, canvas.width/2 + 150, 950);
 
     // 添加壓力指數標題
-    ctx.font = 'bold 64px sans-serif';
+    ctx.font = 'bold 72px "Noto Sans TC"';
     ctx.fillStyle = '#ffffff';
-    ctx.fillText('壓力指數', canvas.width/2, 1200);
+    ctx.fillText('壓力指數', canvas.width/2, 1100);
 
-    // 添加壓力指數進度條
+    // 繪製壓力值進度條
+    const stressBarWidth = 900;
+    const stressBarHeight = 48;
     const stressProgress = game.data.stress / GAME_CONFIG.MAX_STRESS;
     drawProgressBar(
         ctx,
-        240, // x
-        1250, // y
-        600, // width
-        20,  // height
+        (canvas.width - stressBarWidth) / 2,
+        1200,
+        stressBarWidth,
+        stressBarHeight,
         stressProgress,
-        '#ef4444', // 漸層色1
-        '#f87171'  // 漸層色2
+        '#ef4444',
+        '#dc2626'
     );
 
-    // 添加壓力指數數值
-    ctx.font = 'bold 120px sans-serif';
-    const stressPercentage = (stressProgress * 100).toFixed(1);
-    ctx.fillText(`${stressPercentage}%`, canvas.width/2, 1400);
+    // 添加壓力值百分比
+    ctx.font = 'bold 72px "Noto Sans TC"';
+    const stressPercentage = ((game.data.stress / GAME_CONFIG.MAX_STRESS) * 100).toFixed(1);
+    ctx.fillText(`${stressPercentage}%`, canvas.width/2, 1280);
 
-    try {
-        // 生成 QR Code
-        const qrCodeUrl = await QRCode.toDataURL('https://byebyeboss.xyz', {
-            width: 200,
-            height: 200,
-            margin: 1,
-            color: {
-                dark: '#ffffff',
-                light: '#13111C'
-            }
-        });
+    // 添加 QR Code
+    const qrSize = 200;
+    const qrCodeData = await generateQRCode('byebyeboss.com');
+    ctx.drawImage(
+        qrCodeData,
+        (canvas.width - qrSize) / 2,
+        1350,
+        qrSize,
+        qrSize
+    );
 
-        // 添加 QR Code
-        const qrImage = new Image();
-        await new Promise((resolve, reject) => {
-            qrImage.onload = resolve;
-            qrImage.onerror = reject;
-            qrImage.src = qrCodeUrl;
-        });
-        
-        const qrSize = 200;
-        const qrX = (canvas.width - qrSize) / 2;
-        const qrY = canvas.height - qrSize - 100;
-        ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
-
-        // 添加掃描提示
-        ctx.font = '40px sans-serif';
-        ctx.fillStyle = '#a78bfa';
-        ctx.fillText('掃描 QR Code 開始你的離職之旅', canvas.width/2, canvas.height - 40);
-
-    } catch (error) {
-        console.error('QR Code 生成失敗:', error);
-    }
+    // 添加掃描提示
+    ctx.font = '48px "Noto Sans TC"';
+    ctx.fillStyle = '#a78bfa';
+    ctx.fillText('掃描 QR Code 開始你的離職之旅', canvas.width/2, 1600);
 
     return canvas.toDataURL('image/png');
+}
+
+// 生成 QR Code 的輔助函數
+function generateQRCode(url) {
+    return new Promise((resolve) => {
+        // 創建一個臨時的 div 來生成 QR code
+        const tempDiv = document.createElement('div');
+        tempDiv.style.display = 'none';
+        document.body.appendChild(tempDiv);
+
+        // 使用 qrcode.js 生成 QR code
+        const qr = new QRCode(tempDiv, {
+            text: url,
+            width: 200,
+            height: 200,
+            colorDark: '#FFFFFF', // QR Code 顏色設為白色
+            colorLight: '#00000000', // 背景設為透明
+            correctLevel: QRCode.CorrectLevel.H
+        });
+
+        // 等待 QR code 生成完成
+        setTimeout(() => {
+            // 獲取 QR code 的圖片
+            const qrImage = tempDiv.querySelector('img');
+            
+            // 創建一個臨時的 Image 對象
+            const img = new Image();
+            img.onload = () => {
+                // 清理臨時元素
+                document.body.removeChild(tempDiv);
+                resolve(img);
+            };
+            img.src = qrImage.src;
+        }, 100);
+    });
 }
 
 // 分享進度函數
@@ -555,48 +577,52 @@ async function shareProgress() {
     try {
         console.log('開始分享進度');
         
-        // 詢問暱稱，如果取消則使用預設值
         const { value: nickname, isDismissed } = await Swal.fire({
             title: '分享你的離職進度',
             input: 'text',
             inputLabel: '你的暱稱',
             inputPlaceholder: '請輸入暱稱',
-            inputValue: '匿名社畜', // 預設值
+            inputValue: '匿名社畜',
             showCancelButton: true,
             confirmButtonText: '下一步',
             cancelButtonText: '取消',
             background: 'rgba(13, 12, 19, 0.95)',
             color: '#fff',
-            confirmButtonColor: '#6D28D9',
-            inputAttributes: {
-                autocomplete: 'off',
-                autofocus: true
-            }
+            confirmButtonColor: '#6D28D9'
         });
 
-        // 如果用戶點擊取消，則直接返回
         if (isDismissed) return;
 
-        // 使用輸入的暱稱或預設值
         const finalNickname = nickname || '匿名社畜';
-        console.log('生成分享卡片，暱稱:', finalNickname);
-        
-        // 生成分享卡片
         const shareImage = await generateShareCard(finalNickname);
         
-        // 顯示預覽
+        // 修改預覽對話框，添加關閉按鈕
         const result = await Swal.fire({
             title: '分享卡片預覽',
             imageUrl: shareImage,
-            imageWidth: 540,  // 保持 9:16 的比例但縮小尺寸以適應螢幕
-            imageHeight: 960,
+            imageWidth: 600,
+            imageHeight: 800,
             background: 'rgba(13, 12, 19, 0.95)',
             color: '#fff',
-            confirmButtonText: '下載圖片',
-            confirmButtonColor: '#6D28D9',
+            showCloseButton: true,  // 添加關閉按鈕
+            showDenyButton: true,
             showCancelButton: true,
-            cancelButtonText: '取消'
+            confirmButtonText: '儲存圖片',
+            denyButtonText: '複製圖片',
+            cancelButtonText: '分享到 IG 限時動態',
+            confirmButtonColor: '#6D28D9',
+            denyButtonColor: '#4B5563',
+            cancelButtonColor: '#E1306C',
+            allowOutsideClick: true,  // 允許點擊外部關閉
+            allowEscapeKey: true      // 允許按 ESC 關閉
         });
+
+        // 如果用戶關閉對話框或點擊外部，直接返回
+        if (result.dismiss === Swal.DismissReason.close || 
+            result.dismiss === Swal.DismissReason.backdrop || 
+            result.dismiss === Swal.DismissReason.esc) {
+            return;
+        }
 
         if (result.isConfirmed) {
             // 下載圖片
@@ -604,6 +630,94 @@ async function shareProgress() {
             link.download = '離職進度分享.png';
             link.href = shareImage;
             link.click();
+            
+            Swal.fire({
+                title: '儲存成功！',
+                text: '圖片已儲存到你的裝置',
+                icon: 'success',
+                confirmButtonColor: '#6D28D9',
+                showCloseButton: true,
+                timer: 2000,
+                timerProgressBar: true
+            });
+        } 
+        else if (result.isDenied) {
+            // 複製圖片到剪貼簿
+            try {
+                const response = await fetch(shareImage);
+                const blob = await response.blob();
+                await navigator.clipboard.write([
+                    new ClipboardItem({
+                        [blob.type]: blob
+                    })
+                ]);
+                
+                Swal.fire({
+                    title: '複製成功！',
+                    text: '圖片已複製到剪貼簿',
+                    icon: 'success',
+                    confirmButtonColor: '#6D28D9',
+                    showCloseButton: true,
+                    timer: 2000,
+                    timerProgressBar: true
+                });
+            } catch (error) {
+                console.error('複製圖片失敗:', error);
+                Swal.fire({
+                    title: '複製失敗',
+                    text: '請改用儲存圖片功能',
+                    icon: 'error',
+                    confirmButtonColor: '#6D28D9',
+                    showCloseButton: true
+                });
+            }
+        }
+        else if (result.dismiss === Swal.DismissReason.cancel) {
+            // 分享到 Instagram 限時動態
+            try {
+                const response = await fetch(shareImage);
+                const blob = await response.blob();
+                const filesArray = [
+                    new File([blob], 'resignation-progress.png', {
+                        type: 'image/png'
+                    })
+                ];
+                
+                if (navigator.share && navigator.canShare({ files: filesArray })) {
+                    await navigator.share({
+                        files: filesArray,
+                        title: '我的離職進度',
+                        text: '來看看我的離職進度！'
+                    });
+                } else {
+                    // 如果不支援直接分享，提供手動分享指引
+                    const link = document.createElement('a');
+                    link.download = '離職進度分享.png';
+                    link.href = shareImage;
+                    link.click();
+                    
+                    Swal.fire({
+                        title: '手動分享到 IG',
+                        html: `
+                            1. 圖片已下載到你的裝置<br>
+                            2. 開啟 Instagram App<br>
+                            3. 點擊右上角 "+" 按鈕<br>
+                            4. 選擇 "限時動態"<br>
+                            5. 選擇剛才下載的圖片
+                        `,
+                        icon: 'info',
+                        confirmButtonColor: '#6D28D9'
+                    });
+                }
+            } catch (error) {
+                console.error('分享到 Instagram 失敗:', error);
+                Swal.fire({
+                    title: '分享失敗',
+                    text: '請改用儲存圖片功能',
+                    icon: 'error',
+                    confirmButtonColor: '#6D28D9'
+                });
+            }
         }
     } catch (error) {
         console.error('分享進度時發生錯誤:', error);
@@ -611,9 +725,7 @@ async function shareProgress() {
             title: '分享失敗',
             text: '無法生成分享圖片',
             icon: 'error',
-            confirmButtonColor: '#6D28D9',
-            background: 'rgba(13, 12, 19, 0.95)',
-            color: '#fff'
+            confirmButtonColor: '#6D28D9'
         });
     }
 }
