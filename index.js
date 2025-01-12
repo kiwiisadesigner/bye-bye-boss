@@ -407,477 +407,8 @@ window.nextQuote = nextQuote;
 // 設置自動輪播
 let quoteInterval = setInterval(() => updateQuote('next'), 5000);
 
-// 分享進度功能
-async function shareProgress() {
-    try {
-        const { value: displayName, isDismissed } = await Swal.fire({
-            title: '請輸入你的暱稱',
-            input: 'text',
-            inputValue: '',
-            inputPlaceholder: '匿名社畜',
-            showCancelButton: true,
-            confirmButtonText: '產生分享卡片',
-            cancelButtonText: '取消',
-            background: 'rgba(13, 12, 19, 0.95)',
-            color: '#fff',
-            confirmButtonColor: '#6D28D9',
-            customClass: swalCustomClass
-        });
-
-        if (isDismissed) return;
-        const name = displayName || '匿名社畜';
-
-        Swal.fire({
-            title: '正在生成分享卡片...',
-            allowOutsideClick: false,
-            showConfirmButton: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
-
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = 600;   // Instagram 風格的寬高比
-        canvas.height = 750;
-
-        // 背景漸層
-        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        gradient.addColorStop(0, '#1a1b3c');
-        gradient.addColorStop(1, '#2d1b4e');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // 等待字體載入
-        await document.fonts.ready;
-        await document.fonts.load('bold 48px "Noto Sans TC"');
-        await document.fonts.load('normal 24px "Noto Sans TC"');
-
-        // 添加磨砂玻璃效果的背景卡片
-        const cardPadding = 40;
-        const cardRadius = 20;
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-        roundRect(ctx, cardPadding, cardPadding, canvas.width - cardPadding * 2, canvas.height - cardPadding * 2, cardRadius);
-
-        // 頂部標題區域
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
-        roundRect(ctx, cardPadding, cardPadding, canvas.width - cardPadding * 2, 100, cardRadius);
-
-        const centerX = canvas.width / 2;
-
-        // 標題和暱稱
-        ctx.textAlign = 'center';
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 32px "Noto Sans TC"';
-        ctx.fillText('我的離職進度', centerX, cardPadding + 45);
-        ctx.font = '20px "Noto Sans TC"';
-        ctx.fillStyle = '#a78bfa';
-        ctx.fillText(`${name} 的離職日記`, centerX, cardPadding + 75);
-
-        // 等級顯示（大型）
-        const lvText = `Lv.${game.data.level}`;
-        ctx.font = 'bold 72px "Noto Sans TC"';
-        const lvGradient = ctx.createLinearGradient(centerX - 80, 200, centerX + 80, 200);
-        lvGradient.addColorStop(0, '#6D28D9');
-        lvGradient.addColorStop(1, '#DB2777');
-        ctx.fillStyle = lvGradient;
-        ctx.fillText(lvText, centerX, 220);
-
-        // 經驗值進度條（時尚風格）
-        const barWidth = canvas.width - (cardPadding * 4);
-        const barHeight = 12;
-        const barY = 260;
-        
-        // 進度條背景
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-        roundRect(ctx, cardPadding * 2, barY, barWidth, barHeight, barHeight / 2);
-        
-        // 進度條
-        const expProgress = game.data.exp / game.data.expToNext;
-        const expGradient = ctx.createLinearGradient(cardPadding * 2, 0, cardPadding * 2 + barWidth, 0);
-        expGradient.addColorStop(0, '#6D28D9');
-        expGradient.addColorStop(1, '#DB2777');
-        ctx.fillStyle = expGradient;
-        roundRect(ctx, cardPadding * 2, barY, barWidth * expProgress, barHeight, barHeight / 2);
-
-        // 經驗值文字
-        ctx.font = '18px "Noto Sans TC"';
-        ctx.fillStyle = '#ffffff';
-        ctx.fillText(`${game.data.exp} / ${game.data.expToNext}`, centerX, barY + 35);
-
-        // 心情統計區域
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
-        roundRect(ctx, cardPadding * 2, 320, barWidth, 120, 15);
-
-        // 心情標題
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 24px "Noto Sans TC"';
-        ctx.fillText('今日心情', centerX, 355);
-
-        // 心情數據
-        const moodY = 400;
-        const moodSpacing = 80;
-        
-        // 開心數據
-        ctx.font = '36px "Noto Sans TC"';
-        ctx.fillText('😊', centerX - moodSpacing, moodY);
-        ctx.font = 'bold 32px "Noto Sans TC"';
-        ctx.fillStyle = '#10B981';
-        ctx.fillText(game.data.happyCount, centerX - moodSpacing, moodY + 40);
-
-        // 分隔線
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.fillRect(centerX - 1, moodY - 30, 2, 80);
-
-        // 生氣數據
-        ctx.font = '36px "Noto Sans TC"';
-        ctx.fillStyle = '#ffffff';
-        ctx.fillText('😡', centerX + moodSpacing, moodY);
-        ctx.font = 'bold 32px "Noto Sans TC"';
-        ctx.fillStyle = '#EF4444';
-        ctx.fillText(game.data.angryCount, centerX + moodSpacing, moodY + 40);
-
-        // 壓力指數區域
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
-        roundRect(ctx, cardPadding * 2, 470, barWidth, 120, 15);
-
-        // 壓力標題和數值
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 24px "Noto Sans TC"';
-        ctx.fillText('壓力指數', centerX, 505);
-        ctx.font = 'bold 48px "Noto Sans TC"';
-        ctx.fillText(`${(game.data.stress / GAME_CONFIG.MAX_STRESS * 100).toFixed(1)}%`, centerX, 560);
-
-        // 底部資訊
-        ctx.font = '20px "Noto Sans TC"';
-        ctx.fillStyle = '#a78bfa';
-        ctx.fillText('掃描 QR Code 開始你的離職之旅', centerX, canvas.height - 60);
-
-        // 生成圖片
-        const imageUrl = canvas.toDataURL('image/png');
-
-        // 關閉載入提示
-        Swal.close();
-        
-        // 創建按鈕容器
-        const buttonContainer = document.createElement('div');
-        buttonContainer.className = 'share-buttons';
-        buttonContainer.innerHTML = `
-            <button class="share-btn copy-btn" onclick="copyImage()">
-                複製圖片
-            </button>
-            <button class="share-btn download-btn" onclick="downloadImage()">
-                下載圖片
-            </button>
-            <button class="share-btn instagram-story-btn" onclick="shareToInstagramStory()">
-                分享到 IG 限時動態
-            </button>
-        `;
-
-        // 更新按鈕樣式
-        const style = document.createElement('style');
-        style.textContent = `
-            .share-buttons {
-                display: flex;
-                gap: 12px;
-                margin-top: 20px;
-                justify-content: center;
-            }
-            
-            .share-btn {
-                padding: 12px 24px;
-                border-radius: 8px;
-                border: none;
-                cursor: pointer;
-                font-weight: bold;
-                transition: all 0.2s;
-            }
-            
-            .share-btn:hover {
-                transform: translateY(-2px);
-                opacity: 0.9;
-            }
-            
-            .instagram-story-btn {
-                background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-                color: white;
-            }
-            
-            .download-btn {
-                background: #6D28D9;
-                color: white;
-            }
-            
-            .copy-btn {
-                background: #4F46E5;
-                color: white;
-            }
-        `;
-
-        document.head.appendChild(style);
-        document.body.appendChild(buttonContainer);
-
-        // Instagram 限時動態分享功能
-        window.shareToInstagramStory = async function() {
-            try {
-                const imageBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-                const filesArray = [
-                    new File([imageBlob], 'resignation-progress.png', {
-                        type: 'image/png'
-                    })
-                ];
-                
-                if (navigator.share && navigator.canShare({ files: filesArray })) {
-                    await navigator.share({
-                        files: filesArray,
-                    });
-                    document.body.removeChild(buttonContainer);
-                    document.head.removeChild(style);
-                } else {
-                    // 備用方案：下載圖片
-                    const url = URL.createObjectURL(imageBlob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'resignation-progress.png';
-                    a.click();
-                    URL.revokeObjectURL(url);
-                    alert('請將圖片儲存後，手動分享到 Instagram 限時動態');
-                }
-            } catch (error) {
-                console.error('分享到 Instagram 時發生錯誤:', error);
-                alert('分享失敗，請稍後再試');
-            }
-        };
-
-        setTimeout(async () => {
-            const result = await Swal.fire({
-                imageUrl,
-                imageWidth: 400,
-                imageAlt: '離職進度分享卡片',
-                title: '分享卡片已生成',
-                showDenyButton: true,
-                showCancelButton: true,
-                confirmButtonText: '儲存圖片',
-                denyButtonText: '複製圖片',
-                cancelButtonText: '分享到 IG 限時動態',
-                background: 'rgba(13, 12, 19, 0.95)',
-                color: '#fff',
-                confirmButtonColor: '#6D28D9',
-                denyButtonColor: '#4F46E5',
-                cancelButtonColor: '#E1306C',
-                customClass: swalCustomClass,
-                allowOutsideClick: false
-            });
-
-            if (result.isConfirmed) {
-                try {
-                    // 檢查是否為移動設備
-                    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                    
-                    if (isMobile) {
-                        // 移動設備：使用 Blob URL
-                        const blob = await fetch(imageUrl).then(r => r.blob());
-                        const blobUrl = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = blobUrl;
-                        a.download = '離職進度.png';
-                        a.style.display = 'none';
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(blobUrl);
-                        
-                        // 顯示提示
-                        Swal.fire({
-                            title: '圖片已準備好',
-                            text: '請在彈出的選項中選擇「儲存圖片」',
-                            icon: 'success',
-                            background: 'rgba(13, 12, 19, 0.95)',
-                            color: '#fff',
-                            confirmButtonColor: '#6D28D9',
-                            customClass: swalCustomClass
-                        });
-                    } else {
-                        // 桌面設備：直接下載
-                        const a = document.createElement('a');
-                        a.href = imageUrl;
-                        a.download = '離職進度.png';
-                        a.style.display = 'none';
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        
-                        // 顯示成功提示
-                        Swal.fire({
-                            title: '儲存成功',
-                            text: '圖片已儲存到你的下載資料夾',
-                            icon: 'success',
-                            background: 'rgba(13, 12, 19, 0.95)',
-                            color: '#fff',
-                            confirmButtonColor: '#6D28D9',
-                            customClass: swalCustomClass
-                        });
-                    }
-                } catch (error) {
-                    console.error('儲存圖片失敗:', error);
-                    Swal.fire({
-                        title: '儲存失敗',
-                        text: '請稍後再試',
-                        icon: 'error',
-                        background: 'rgba(13, 12, 19, 0.95)',
-                        color: '#fff',
-                        confirmButtonColor: '#6D28D9',
-                        customClass: swalCustomClass
-                    });
-                }
-            } else if (result.isDenied) {
-                try {
-                    const blob = await fetch(imageUrl).then(r => r.blob());
-                    await navigator.clipboard.write([
-                        new ClipboardItem({ [blob.type]: blob })
-                    ]);
-                    Swal.fire({
-                        title: '已複製到剪貼簿',
-                        icon: 'success',
-                        background: 'rgba(13, 12, 19, 0.95)',
-                        color: '#fff',
-                        confirmButtonColor: '#6D28D9',
-                        customClass: swalCustomClass
-                    });
-                } catch (error) {
-                    console.error('複製圖片失敗:', error);
-                    Swal.fire({
-                        title: '複製失敗',
-                        text: '請使用下載圖片的方式',
-                        icon: 'error',
-                        background: 'rgba(13, 12, 19, 0.95)',
-                        color: '#fff',
-                        confirmButtonColor: '#6D28D9',
-                        customClass: swalCustomClass
-                    });
-                }
-            } else if (result.dismiss === Swal.DismissReason.cancel) {
-                // 處理 Instagram 限時動態分享
-                try {
-                    const imageBlob = await fetch(imageUrl).then(r => r.blob());
-                    const filesArray = [
-                        new File([imageBlob], 'resignation-progress.png', {
-                            type: 'image/png'
-                        })
-                    ];
-                    
-                    // 檢查是否為移動設備
-                    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                    
-                    if (isMobile) {
-                        // 嘗試直接開啟 Instagram Stories
-                        const instagramUrl = `instagram-stories://share`;
-                        window.location.href = instagramUrl;
-                        
-                        // 延遲一下再觸發檔案選擇
-                        setTimeout(async () => {
-                            if (navigator.share && navigator.canShare({ files: filesArray })) {
-                                try {
-                                    await navigator.share({
-                                        files: filesArray,
-                                    });
-                                } catch (error) {
-                                    // 如果分享失敗，提供備用方案
-                                    const blobUrl = URL.createObjectURL(imageBlob);
-                                    const a = document.createElement('a');
-                                    a.href = blobUrl;
-                                    a.download = 'resignation-progress.png';
-                                    a.click();
-                                    URL.revokeObjectURL(blobUrl);
-                                    
-                                    Swal.fire({
-                                        title: '請手動分享',
-                                        text: '圖片已儲存，請開啟 Instagram 並選擇此圖片發布限時動態',
-                                        icon: 'info',
-                                        background: 'rgba(13, 12, 19, 0.95)',
-                                        color: '#fff',
-                                        confirmButtonColor: '#6D28D9',
-                                        customClass: swalCustomClass
-                                    });
-                                }
-                            } else {
-                                // 不支援 Web Share API 的情況
-                                const blobUrl = URL.createObjectURL(imageBlob);
-                                const a = document.createElement('a');
-                                a.href = blobUrl;
-                                a.download = 'resignation-progress.png';
-                                a.click();
-                                URL.revokeObjectURL(blobUrl);
-                                
-                                Swal.fire({
-                                    title: '請手動分享',
-                                    text: '圖片已儲存，請開啟 Instagram 並選擇此圖片發布限時動態',
-                                    icon: 'info',
-                                    background: 'rgba(13, 12, 19, 0.95)',
-                                    color: '#fff',
-                                    confirmButtonColor: '#6D28D9',
-                                    customClass: swalCustomClass
-                                });
-                            }
-                        }, 500);
-                    } else {
-                        // 桌面設備：提供儲存選項
-                        const url = URL.createObjectURL(imageBlob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = 'resignation-progress.png';
-                        a.click();
-                        URL.revokeObjectURL(url);
-                        
-                        Swal.fire({
-                            title: '請使用手機分享',
-                            text: '圖片已儲存，請在手機上開啟 Instagram 並選擇此圖片發布限時動態',
-                            icon: 'info',
-                            background: 'rgba(13, 12, 19, 0.95)',
-                            color: '#fff',
-                            confirmButtonColor: '#6D28D9',
-                            customClass: swalCustomClass
-                        });
-                    }
-                } catch (error) {
-                    console.error('分享到 Instagram 時發生錯誤:', error);
-                    Swal.fire({
-                        title: '分享失敗',
-                        text: '請稍後再試',
-                        icon: 'error',
-                        background: 'rgba(13, 12, 19, 0.95)',
-                        color: '#fff',
-                        confirmButtonColor: '#6D28D9',
-                        customClass: swalCustomClass
-                    });
-                }
-            }
-        }, 100);
-
-    } catch (error) {
-        console.error('生成分享圖片時發生錯誤:', error);
-        alert('生成分享圖片失敗，請稍後再試');
-    }
-}
-
-// 添加圓角矩形繪製函數
-function roundRect(ctx, x, y, width, height, radius) {
-    ctx.beginPath();
-    ctx.moveTo(x + radius, y);
-    ctx.lineTo(x + width - radius, y);
-    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-    ctx.lineTo(x + width, y + height - radius);
-    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-    ctx.lineTo(x + radius, y + height);
-    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-    ctx.lineTo(x, y + radius);
-    ctx.quadraticCurveTo(x, y, x + radius, y);
-    ctx.closePath();
-    ctx.fill();
-}
-
-// 進度條繪製函數
-function drawProgressBar(ctx, x, y, width, height, progress, label, text, color1, color2) {
+// 繪製進度條函數
+function drawProgressBar(ctx, x, y, width, height, progress, color1, color2) {
     // 繪製進度條背景
     ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
     ctx.fillRect(x, y, width, height);
@@ -893,20 +424,218 @@ function drawProgressBar(ctx, x, y, width, height, progress, label, text, color1
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
     ctx.lineWidth = 2;
     ctx.strokeRect(x, y, width, height);
+}
 
-    // 如果有標籤和文字要顯示
-    if (label || text) {
-        ctx.font = '24px sans-serif';
-        ctx.fillStyle = '#ffffff';
-        if (label) {
-            ctx.textAlign = 'left';
-            ctx.fillText(label, x, y - 10);
-        }
-        if (text) {
-            ctx.textAlign = 'right';
-            ctx.fillText(text, x + width, y - 10);
-        }
+// 生成分享卡片函數
+async function generateShareCard(nickname) {
+    console.log('開始生成分享卡片');
+    
+    // 創建 canvas，使用 Instagram Stories 的標準尺寸
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 1080;   // IG Stories 標準寬度
+    canvas.height = 1920;  // IG Stories 標準高度
+
+    // 設置背景
+    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    gradient.addColorStop(0, '#1a1631');
+    gradient.addColorStop(1, '#0f0c1d');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 調整所有元素的位置和大小以適應新尺寸
+    ctx.textAlign = 'center';
+
+    // 添加標題
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 72px sans-serif';
+    ctx.fillText('我的離職進度', canvas.width/2, 200);
+
+    // 添加暱稱
+    ctx.font = '40px sans-serif';
+    ctx.fillStyle = '#a78bfa';
+    ctx.fillText(`${nickname} 的離職日記`, canvas.width/2, 280);
+
+    // 添加等級
+    ctx.font = 'bold 144px sans-serif';
+    ctx.fillStyle = '#a855f7';
+    ctx.fillText(`Lv.${game.data.level}`, canvas.width/2, 600);
+
+    // 添加經驗值進度條
+    const expProgress = game.data.exp / game.data.expToNext;
+    drawProgressBar(
+        ctx,
+        240, // x
+        630, // y
+        600, // width
+        20,  // height
+        expProgress,
+        '#a855f7', // 漸層色1
+        '#d8b4fe'  // 漸層色2
+    );
+    
+    // 添加經驗值文字
+    ctx.font = '48px sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(`${game.data.exp} / ${game.data.expToNext}`, canvas.width/2, 700);
+
+    // 添加今日心情
+    ctx.font = 'bold 64px sans-serif';
+    ctx.fillText('今日心情', canvas.width/2, 900);
+    
+    // 添加表情符號和數字
+    ctx.font = '56px sans-serif';
+    ctx.fillStyle = '#22c55e';
+    ctx.fillText(`😊 ${game.data.happyCount}`, canvas.width/2 - 120, 1000);
+    ctx.fillStyle = '#ef4444';
+    ctx.fillText(`😠 ${game.data.angryCount}`, canvas.width/2 + 120, 1000);
+
+    // 添加壓力指數標題
+    ctx.font = 'bold 64px sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('壓力指數', canvas.width/2, 1200);
+
+    // 添加壓力指數進度條
+    const stressProgress = game.data.stress / GAME_CONFIG.MAX_STRESS;
+    drawProgressBar(
+        ctx,
+        240, // x
+        1250, // y
+        600, // width
+        20,  // height
+        stressProgress,
+        '#ef4444', // 漸層色1
+        '#f87171'  // 漸層色2
+    );
+
+    // 添加壓力指數數值
+    ctx.font = 'bold 120px sans-serif';
+    const stressPercentage = (stressProgress * 100).toFixed(1);
+    ctx.fillText(`${stressPercentage}%`, canvas.width/2, 1400);
+
+    try {
+        // 生成 QR Code
+        const qrCodeUrl = await QRCode.toDataURL('https://byebyeboss.xyz', {
+            width: 200,
+            height: 200,
+            margin: 1,
+            color: {
+                dark: '#ffffff',
+                light: '#13111C'
+            }
+        });
+
+        // 添加 QR Code
+        const qrImage = new Image();
+        await new Promise((resolve, reject) => {
+            qrImage.onload = resolve;
+            qrImage.onerror = reject;
+            qrImage.src = qrCodeUrl;
+        });
+        
+        const qrSize = 200;
+        const qrX = (canvas.width - qrSize) / 2;
+        const qrY = canvas.height - qrSize - 100;
+        ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
+
+        // 添加掃描提示
+        ctx.font = '40px sans-serif';
+        ctx.fillStyle = '#a78bfa';
+        ctx.fillText('掃描 QR Code 開始你的離職之旅', canvas.width/2, canvas.height - 40);
+
+    } catch (error) {
+        console.error('QR Code 生成失敗:', error);
     }
+
+    return canvas.toDataURL('image/png');
+}
+
+// 分享進度函數
+async function shareProgress() {
+    try {
+        console.log('開始分享進度');
+        
+        // 詢問暱稱，如果取消則使用預設值
+        const { value: nickname, isDismissed } = await Swal.fire({
+            title: '分享你的離職進度',
+            input: 'text',
+            inputLabel: '你的暱稱',
+            inputPlaceholder: '請輸入暱稱',
+            inputValue: '匿名社畜', // 預設值
+            showCancelButton: true,
+            confirmButtonText: '下一步',
+            cancelButtonText: '取消',
+            background: 'rgba(13, 12, 19, 0.95)',
+            color: '#fff',
+            confirmButtonColor: '#6D28D9',
+            inputAttributes: {
+                autocomplete: 'off',
+                autofocus: true
+            }
+        });
+
+        // 如果用戶點擊取消，則直接返回
+        if (isDismissed) return;
+
+        // 使用輸入的暱稱或預設值
+        const finalNickname = nickname || '匿名社畜';
+        console.log('生成分享卡片，暱稱:', finalNickname);
+        
+        // 生成分享卡片
+        const shareImage = await generateShareCard(finalNickname);
+        
+        // 顯示預覽
+        const result = await Swal.fire({
+            title: '分享卡片預覽',
+            imageUrl: shareImage,
+            imageWidth: 540,  // 保持 9:16 的比例但縮小尺寸以適應螢幕
+            imageHeight: 960,
+            background: 'rgba(13, 12, 19, 0.95)',
+            color: '#fff',
+            confirmButtonText: '下載圖片',
+            confirmButtonColor: '#6D28D9',
+            showCancelButton: true,
+            cancelButtonText: '取消'
+        });
+
+        if (result.isConfirmed) {
+            // 下載圖片
+            const link = document.createElement('a');
+            link.download = '離職進度分享.png';
+            link.href = shareImage;
+            link.click();
+        }
+    } catch (error) {
+        console.error('分享進度時發生錯誤:', error);
+        Swal.fire({
+            title: '分享失敗',
+            text: '無法生成分享圖片',
+            icon: 'error',
+            confirmButtonColor: '#6D28D9',
+            background: 'rgba(13, 12, 19, 0.95)',
+            color: '#fff'
+        });
+    }
+}
+
+// 確保函數在全局範圍可用
+window.generateShareCard = generateShareCard;
+window.shareProgress = shareProgress;
+
+// 添加圓角矩形繪製函數
+function roundRect(ctx, x, y, width, height, radius) {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+    ctx.fill();
 }
 
 // 添加星星背景
@@ -927,25 +656,6 @@ function createStars() {
     }
     
     document.body.prepend(stars);
-}
-
-// 升級時的特效
-function showLevelUpEffect() {
-    const container = document.createElement('div');
-    container.className = 'level-up-effect';
-    document.body.appendChild(container);
-    
-    for (let i = 0; i < 50; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'level-particle';
-        particle.style.setProperty('--angle', `${Math.random() * 360}deg`);
-        particle.style.setProperty('--distance', `${100 + Math.random() * 100}px`);
-        container.appendChild(particle);
-    }
-    
-    setTimeout(() => {
-        container.remove();
-    }, 2000);
 }
 
 // 添加 Instagram Story 分享功能
@@ -1048,110 +758,51 @@ function levelUp() {
 }
 
 // 重置遊戲數據
-async function resetGameData() {
-    console.log('重置函數被調用'); // 添加日誌
-    try {
-        // 顯示確認對話框
-        const result = await Swal.fire({
-            title: '確定要重置所有進度？',
-            text: '此操作將清除所有數據，且無法復原',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc2626',
-            cancelButtonColor: '#6b7280',
-            confirmButtonText: '是的，清除所有進度',
-            cancelButtonText: '取消',
-            background: 'rgba(13, 12, 19, 0.95)',
-            color: '#fff',
-            customClass: swalCustomClass
-        });
-
-        console.log('確認對話框結果:', result); // 添加日誌
-
-        // 如果用戶確認要重置
+function resetGameData() {
+    console.log('重置函數被調用');
+    
+    // 直接使用 SweetAlert2
+    Swal.fire({
+        title: '確定要重置所有進度？',
+        text: '此操作將清除所有數據，且無法復原',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '是的，清除所有進度',
+        cancelButtonText: '取消',
+        background: 'rgba(13, 12, 19, 0.95)',
+        color: '#fff'
+    }).then((result) => {
         if (result.isConfirmed) {
-            console.log('開始重置數據'); // 添加日誌
+            console.log('用戶確認重置');
             
-            // 重置遊戲數據到初始狀態
-            game = {
-                data: {
-                    level: 1,
-                    exp: 0,
-                    expToNext: 1000,
-                    stress: 0,
-                    stressMax: 100,
-                    happyCount: 0,
-                    angryCount: 0,
-                    lastStressReductionTime: null,
-                    lastDailyResetTime: null,
-                    dailyActions: {
-                        overtime: 0,
-                        meeting: 0,
-                        blame: 0,
-                        thunder: 0
-                    }
-                }
-            };
-
             // 清除所有本地存儲
             localStorage.clear();
-            console.log('本地存儲已清除'); // 添加日誌
+            console.log('本地存儲已清除');
             
-            // 保存新的初始狀態
-            saveGameState();
-            
-            // 更新 UI
-            updateUI();
-
-            // 顯示成功提示
-            await Swal.fire({
-                title: '重置成功',
-                text: '所有進度已清除',
-                icon: 'success',
-                confirmButtonColor: '#6D28D9',
-                background: 'rgba(13, 12, 19, 0.95)',
-                color: '#fff',
-                customClass: swalCustomClass
-            });
-
             // 重新載入頁面
-            window.location.reload();
+            setTimeout(() => {
+                window.location.reload(true);
+            }, 100);
         }
-    } catch (error) {
-        console.error('重置遊戲數據時發生錯誤:', error); // 更詳細的錯誤日誌
-        Swal.fire({
-            title: '重置失敗',
-            text: '發生錯誤：' + error.message,
-            icon: 'error',
-            confirmButtonColor: '#6D28D9',
-            background: 'rgba(13, 12, 19, 0.95)',
-            color: '#fff',
-            customClass: swalCustomClass
-        });
-    }
+    }).catch((error) => {
+        console.error('重置過程出錯:', error);
+        alert('重置失敗，請重試');
+    });
 }
 
-// 保存遊戲狀態
-function saveGameState() {
-    try {
-        localStorage.setItem('gameState', JSON.stringify(game.data));
-    } catch (error) {
-        console.error('保存遊戲狀態時發生錯誤:', error);
-    }
-}
-
-// 確保函數在全局範圍可用
+// 直接在全局範圍綁定函數
 window.resetGameData = resetGameData;
 
-// 在 DOM 載入完成後綁定事件
+// DOM 載入完成後綁定事件
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM 載入完成'); // 添加日誌
-    const resetButton = document.querySelector('.reset-btn');
+    console.log('DOM 載入完成');
+    const resetButton = document.getElementById('resetButton');
+    
     if (resetButton) {
-        console.log('找到重置按鈕'); // 添加日誌
-        resetButton.addEventListener('click', resetGameData);
-    } else {
-        console.log('未找到重置按鈕'); // 添加日誌
+        console.log('找到重置按鈕');
+        resetButton.onclick = resetGameData;
     }
 });
 
@@ -1201,3 +852,81 @@ document.addEventListener('DOMContentLoaded', initializeGame);
 // 確保函數在全局範圍可用
 window.resetGameData = resetGameData;
 window.initializeGame = initializeGame;   
+
+// 全局重置處理函數
+window.handleReset = function() {
+    console.log('開始重置流程');
+    
+    Swal.fire({
+        title: '確定要重置所有進度？',
+        text: '此操作將清除所有數據，且無法復原',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '是的，清除所有進度',
+        cancelButtonText: '取消',
+        background: 'rgba(13, 12, 19, 0.95)',
+        color: '#fff'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            try {
+                // 清除所有遊戲數據
+                game.data = {
+                    level: 1,
+                    exp: 0,
+                    expToNext: 1000,
+                    stress: 0,
+                    stressMax: 100,
+                    happyCount: 0,
+                    angryCount: 0,
+                    lastStressReductionTime: null,
+                    lastDailyResetTime: null,
+                    dailyActions: {
+                        overtime: 0,
+                        meeting: 0,
+                        blame: 0,
+                        thunder: 0
+                    }
+                };
+
+                // 清除本地存儲
+                localStorage.clear();
+                console.log('數據已清除');
+
+                // 顯示成功消息
+                Swal.fire({
+                    title: '重置成功！',
+                    text: '頁面將重新載入',
+                    icon: 'success',
+                    confirmButtonColor: '#6D28D9'
+                }).then(() => {
+                    // 強制重新載入頁面
+                    window.location.href = window.location.href + '?t=' + new Date().getTime();
+                });
+            } catch (error) {
+                console.error('重置過程出錯:', error);
+                Swal.fire({
+                    title: '重置失敗',
+                    text: '請重新整理頁面後再試',
+                    icon: 'error',
+                    confirmButtonColor: '#dc2626'
+                });
+            }
+        }
+    });
+};
+
+// 不再需要額外的事件監聽器
+console.log('重置功能已初始化');   
+
+// 簡單的重置函數
+window.simpleReset = function() {
+    if (confirm('確定要重置所有進度嗎？此操作無法復原')) {
+        // 清除本地存儲
+        localStorage.clear();
+        
+        // 直接重新載入頁面
+        window.location.reload();
+    }
+};   
